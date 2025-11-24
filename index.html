@@ -813,347 +813,277 @@
 
     
 <script>
-    console.log('✓ QA Form Script Loading (email-submit version)...');
+// QA Plant Visit - Email Submit Version (simplified JS, wide browser support)
+var currentPage = 1;
+var totalPages = 2;
+var pages = document.querySelectorAll('.page');
+var prevBtn = document.getElementById('prevBtn');
+var nextBtn = document.getElementById('nextBtn');
+var submitBtn = document.getElementById('submitBtn');
+var progressFill = document.getElementById('progressFill');
+var currentPageSpan = document.getElementById('currentPage');
 
-    // =========================
-    // BASIC FORM CONFIGURATION
-    // =========================
-
-    // Page Navigation
-    let currentPage = 1;
-    const totalPages = 2;
-    const pages = document.querySelectorAll('.page');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressFill = document.getElementById('progressFill');
-    const currentPageSpan = document.getElementById('currentPage');
-
-    function showPage(pageNum) {
-        pages.forEach((page, index) => {
-            page.classList.remove('active');
-            if (index === pageNum - 1) {
-                page.classList.add('active');
-            }
-        });
-
-        currentPage = pageNum;
-        currentPageSpan.textContent = pageNum;
-
-        // Update progress bar
-        const progress = (pageNum / totalPages) * 100;
-        progressFill.style.width = progress + '%';
-
-        // Show/hide navigation buttons
-        prevBtn.style.display = pageNum === 1 ? 'none' : 'block';
-        nextBtn.style.display = pageNum === totalPages ? 'none' : 'block';
-        submitBtn.style.display = pageNum === totalPages ? 'block' : 'none';
+function showPage(pageNum) {
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+        if (i === pageNum - 1) {
+            pages[i].classList.add('active');
+        }
     }
+    currentPage = pageNum;
+    if (currentPageSpan) currentPageSpan.textContent = String(pageNum);
+    if (progressFill) {
+        var progress = (pageNum / totalPages) * 100;
+        progressFill.style.width = progress + '%';
+    }
+    if (prevBtn) prevBtn.style.display = (pageNum === 1) ? 'none' : 'block';
+    if (nextBtn) nextBtn.style.display = (pageNum === totalPages) ? 'none' : 'block';
+    if (submitBtn) submitBtn.style.display = (pageNum === totalPages) ? 'block' : 'none';
+}
 
-    nextBtn.addEventListener('click', () => {
-        if (validatePage(currentPage)) {
-            showPage(currentPage + 1);
-            window.scrollTo(0, 0);
+if (nextBtn) nextBtn.addEventListener('click', function () {
+    if (validatePage(currentPage)) {
+        showPage(currentPage + 1);
+        window.scrollTo(0, 0);
+    }
+});
+
+if (prevBtn) prevBtn.addEventListener('click', function () {
+    showPage(currentPage - 1);
+    window.scrollTo(0, 0);
+});
+
+var regionSelect = document.getElementById('regionSelect');
+var houstonLocations = document.getElementById('houstonLocations');
+
+if (regionSelect && houstonLocations) {
+    regionSelect.addEventListener('change', function () {
+        var select = houstonLocations.querySelector('select');
+        houstonLocations.classList.add('hidden');
+        houstonLocations.style.display = 'none';
+        if (select) {
+            select.removeAttribute('required');
+            select.value = '';
+        }
+        if (this.value === 'Houston') {
+            houstonLocations.classList.remove('hidden');
+            houstonLocations.style.display = 'block';
+            if (select) select.setAttribute('required', 'required');
         }
     });
+}
 
-    prevBtn.addEventListener('click', () => {
-        showPage(currentPage - 1);
-        window.scrollTo(0, 0);
-    });
+var photoUpload = document.getElementById('photoUpload');
+var fileList = document.getElementById('fileList');
+var uploadedFiles = [];
 
-    // =========================
-    // CONDITIONAL LOGIC: REGION
-    // =========================
-
-    const regionSelect = document.getElementById('regionSelect');
-    const houstonLocations = document.getElementById('houstonLocations');
-
-    if (!regionSelect) {
-        console.error('ERROR: regionSelect element not found!');
-    }
-    if (!houstonLocations) {
-        console.error('ERROR: houstonLocations element not found!');
-    }
-
-    if (regionSelect && houstonLocations) {
-        console.log('✓ Region dropdown and Houston locations div found successfully');
-
-        regionSelect.addEventListener('change', function () {
-            console.log('=== Region Changed ===');
-            console.log('Selected value:', this.value);
-
-            const select = houstonLocations.querySelector('select');
-
-            // Reset - hide Houston location field
-            houstonLocations.classList.add('hidden');
-            houstonLocations.style.cssText = 'display: none;';
-            if (select) {
-                select.removeAttribute('required');
-                select.value = '';
-            }
-
-            // Show Houston plants when Houston is selected
-            if (this.value === 'Houston') {
-                console.log('✓ HOUSTON SELECTED - Showing plant dropdown');
-                houstonLocations.classList.remove('hidden');
-                houstonLocations.style.cssText = 'display: block;';
-                if (select) {
-                    select.setAttribute('required', 'required');
-                }
-            } else {
-                console.log('Other region selected or empty - hiding plants');
-            }
-        });
-    }
-
-    // =========================
-    // FILE UPLOAD / IMAGES
-    // =========================
-
-    const photoUpload = document.getElementById('photoUpload');
-    const fileList = document.getElementById('fileList');
-    const uploadedFiles = [];
-
-    if (photoUpload && fileList) {
-        photoUpload.addEventListener('change', async function () {
-            const files = Array.from(this.files || []);
-
-            for (let file of files) {
-                if (!file.type.startsWith('image/')) {
-                    showError('Please upload only image files');
-                    continue;
-                }
-
-                if (file.size > 10 * 1024 * 1024) {
-                    showError(`File ${file.name} is too large. Maximum size is 10MB.`);
-                    continue;
-                }
-
-                try {
-                    const compressedImage = await compressImage(file);
-                    uploadedFiles.push({
-                        name: file.name,
-                        data: compressedImage
-                    });
-                } catch (error) {
-                    console.error('Error processing image:', error);
-                    showError(`Failed to process ${file.name}`);
-                }
-            }
-
-            displayFiles();
-            photoUpload.value = '';
-        });
-    }
-
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
-                    const MAX = 1920;
-
-                    if (width > MAX || height > MAX) {
-                        if (width > height) {
-                            height = (height / width) * MAX;
-                            width = MAX;
-                        } else {
-                            width = (width / height) * MAX;
-                            height = MAX;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
-                };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function displayFiles() {
-        if (!fileList) return;
-        fileList.innerHTML = '';
-        uploadedFiles.forEach((file, index) => {
-            const preview = document.createElement('div');
-            preview.className = 'image-preview';
-            preview.innerHTML = `
-                <img src="${file.data}" alt="${file.name}">
-                <button type="button" class="remove-btn" onclick="removeFile(${index})">×</button>
-            `;
-            fileList.appendChild(preview);
-        });
-    }
-
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        displayFiles();
-    }
-
-    // expose for inline onclick
-    window.removeFile = removeFile;
-
-    // =========================
-    // VALIDATION
-    // =========================
-
-    function validatePage(pageNum) {
-        const currentPageDiv = document.getElementById(`page${pageNum}`);
-        const requiredFields = currentPageDiv.querySelectorAll('[required]');
-        let isValid = true;
-        let firstInvalidField = null;
-
-        requiredFields.forEach(field => {
-            const formGroup = field.closest('.form-group');
-            if (formGroup && formGroup.classList.contains('hidden')) {
+if (photoUpload && fileList) {
+    photoUpload.addEventListener('change', function () {
+        var files = Array.prototype.slice.call(photoUpload.files || []);
+        function handleFile(index) {
+            if (index >= files.length) {
+                displayFiles();
+                photoUpload.value = '';
                 return;
             }
+            var file = files[index];
+            if (!file.type || file.type.indexOf('image/') !== 0) {
+                showError('Please upload only image files.');
+                return handleFile(index + 1);
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File ' + file.name + ' is too large. Maximum size is 10MB.');
+                return handleFile(index + 1);
+            }
+            compressImage(file, function (err, dataUrl) {
+                if (!err && dataUrl) {
+                    uploadedFiles.push({ name: file.name, data: dataUrl });
+                }
+                handleFile(index + 1);
+            });
+        }
+        handleFile(0);
+    });
+}
 
-            if (field.type === 'radio') {
-                const radioGroup = currentPageDiv.querySelectorAll(`[name="${field.name}"]`);
-                const isChecked = Array.from(radioGroup).some(radio => radio.checked);
-                if (!isChecked) {
-                    isValid = false;
-                    if (!firstInvalidField) {
-                        firstInvalidField = field;
-                    }
+function compressImage(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+            var width = img.width;
+            var height = img.height;
+            var MAX = 1920;
+            if (width > MAX || height > MAX) {
+                if (width > height) {
+                    height = Math.round((height / width) * MAX);
+                    width = MAX;
+                } else {
+                    width = Math.round((width / height) * MAX);
+                    height = MAX;
                 }
-            } else if (!field.value || field.value.trim() === '') {
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            try {
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                callback(null, dataUrl);
+            } catch (e2) {
+                callback(e2);
+            }
+        };
+        img.onerror = function (err) { callback(err); };
+        img.src = e.target.result;
+    };
+    reader.onerror = function (err) { callback(err); };
+    reader.readAsDataURL(file);
+}
+
+function displayFiles() {
+    if (!fileList) return;
+    fileList.innerHTML = '';
+    for (var i = 0; i < uploadedFiles.length; i++) {
+        var file = uploadedFiles[i];
+        var preview = document.createElement('div');
+        preview.className = 'image-preview';
+        var img = document.createElement('img');
+        img.src = file.data;
+        img.alt = file.name;
+        preview.appendChild(img);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'remove-btn';
+        btn.textContent = 'x';
+        (function (index) {
+            btn.addEventListener('click', function () {
+                removeFile(index);
+            });
+        })(i);
+        preview.appendChild(btn);
+        fileList.appendChild(preview);
+    }
+}
+
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    displayFiles();
+}
+
+function validatePage(pageNum) {
+    var currentPageDiv = document.getElementById('page' + pageNum);
+    if (!currentPageDiv) return true;
+    var requiredFields = currentPageDiv.querySelectorAll('[required]');
+    var isValid = true;
+    var firstInvalidField = null;
+    for (var i = 0; i < requiredFields.length; i++) {
+        var field = requiredFields[i];
+        var formGroup = field.closest ? field.closest('.form-group') : null;
+        if (formGroup && formGroup.classList.contains('hidden')) {
+            continue;
+        }
+        if (field.type === 'radio') {
+            var group = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
+            var checked = false;
+            for (var j = 0; j < group.length; j++) {
+                if (group[j].checked) {
+                    checked = true;
+                    break;
+                }
+            }
+            if (!checked) {
                 isValid = false;
-                field.style.borderColor = 'var(--danger-color)';
-                if (!firstInvalidField) {
-                    firstInvalidField = field;
-                }
+                if (!firstInvalidField) firstInvalidField = field;
+            }
+        } else {
+            if (!field.value || field.value.replace(/\s+/g, '') === '') {
+                isValid = false;
+                field.style.borderColor = '#dc2626';
+                if (!firstInvalidField) firstInvalidField = field;
             } else {
                 field.style.borderColor = '';
             }
-        });
-
-        if (!isValid) {
-            showError('Please fill in all required fields');
-            if (firstInvalidField) {
-                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
         }
-
-        return isValid;
     }
+    if (!isValid) {
+        showError('Please fill in all required fields.');
+        if (firstInvalidField && firstInvalidField.scrollIntoView) {
+            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    return isValid;
+}
 
-    // =========================
-    // FORM SUBMISSION (MAILTO)
-    // =========================
-
-    const formEl = document.getElementById('qaForm');
-    if (formEl) {
-        // disable native HTML5 validation (we do our own)
-        formEl.setAttribute('novalidate', 'novalidate');
-
-        formEl.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!validatePage(currentPage)) {
-                return;
-            }
-
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            if (loadingSpinner) loadingSpinner.classList.add('show');
-
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-
-            // Get target email from "Your Email" field
-            const targetEmail = data.email;
-
-            if (!targetEmail) {
-                if (loadingSpinner) loadingSpinner.classList.remove('show');
-                showError('Please enter a valid email address in the "Your Email" field.');
-                return;
-            }
-
-            // Build email body from form fields
-            const bodyLines = [];
-            bodyLines.push('QA Plant Visit Checklist');
-            bodyLines.push('----------------------------------------');
-            bodyLines.push('');
-
-            Object.keys(data).forEach(key => {
-                if (key === 'email') return;
-                if (key === 'photos') return;
-                const label = key.replace(/_/g, ' ');
-                bodyLines.push(label + ': ' + data[key]);
-            });
-
-            if (uploadedFiles.length > 0) {
-                bodyLines.push('');
-                bodyLines.push('Photos: ' + uploadedFiles.length + ' image file(s) were selected in this report.');
-                bodyLines.push('(Note: Attach photos manually in your email client if they are not auto-attached.)');
-            }
-
-            bodyLines.push('');
-            bodyLines.push('Submitted at: ' + new Date().toLocaleString());
-
-            const subject = 'QA Plant Visit Checklist';
-            const mailtoLink =
-                'mailto:' + encodeURIComponent(targetEmail) +
-                '?subject=' + encodeURIComponent(subject) +
-                '&body=' + encodeURIComponent(bodyLines.join('
-'));
-
+var formEl = document.getElementById('qaForm');
+if (formEl) {
+    formEl.setAttribute('novalidate', 'novalidate');
+    formEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!validatePage(currentPage)) return;
+        var loadingSpinner = document.getElementById('loadingSpinner');
+        if (loadingSpinner) loadingSpinner.classList.add('show');
+        var formData = new FormData(formEl);
+        var data = {};
+        formData.forEach(function (value, key) { data[key] = value; });
+        var targetEmail = data.email;
+        if (!targetEmail) {
             if (loadingSpinner) loadingSpinner.classList.remove('show');
-
-            // Open user's mail client
-            window.location.href = mailtoLink;
-
-            // Show success message on page
-            this.style.display = 'none';
-            const success = document.getElementById('successMessage');
-            if (success) success.classList.add('show');
-            window.scrollTo(0, 0);
-        });
-    } else {
-        console.error('qaForm element not found!');
-    }
-
-    // =========================
-    // ERROR DISPLAY + INIT
-    // =========================
-
-    function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        if (!errorDiv || !errorText) return;
-
-        errorText.textContent = message;
-        errorDiv.classList.add('show');
-        setTimeout(() => {
-            errorDiv.classList.remove('show');
-        }, 5000);
-    }
-
-    // Set today's date by default and initial page
-    document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.querySelector('input[name="visit_date"]');
-        if (dateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
+            showError('Please enter a valid email address in the "Your Email" field.');
+            return;
         }
-        showPage(1);
+        var bodyLines = [];
+        bodyLines.push('QA Plant Visit Checklist');
+        bodyLines.push('----------------------------------------');
+        bodyLines.push('');
+        for (var key in data) {
+            if (!data.hasOwnProperty(key)) continue;
+            if (key === 'email') continue;
+            if (key === 'photos') continue;
+            var label = key.replace(/_/g, ' ');
+            bodyLines.push(label + ': ' + data[key]);
+        }
+        if (uploadedFiles.length > 0) {
+            bodyLines.push('');
+            bodyLines.push('Photos: ' + uploadedFiles.length + ' image file(s) were selected in this report.');
+            bodyLines.push('(Note: Attach photos manually in your email client if they are not auto-attached.)');
+        }
+        bodyLines.push('');
+        var now = new Date();
+        bodyLines.push('Submitted at: ' + now.toLocaleString());
+        var subject = 'QA Plant Visit Checklist';
+        var mailtoLink = 'mailto:' + encodeURIComponent(targetEmail) +
+            '?subject=' + encodeURIComponent(subject) +
+            '&body=' + encodeURIComponent(bodyLines.join('\r\n'));
+        if (loadingSpinner) loadingSpinner.classList.remove('show');
+        window.location.href = mailtoLink;
+        formEl.style.display = 'none';
+        var success = document.getElementById('successMessage');
+        if (success) success.classList.add('show');
+        window.scrollTo(0, 0);
     });
+}
+
+function showError(message) {
+    var errorDiv = document.getElementById('errorMessage');
+    var errorText = document.getElementById('errorText');
+    if (!errorDiv || !errorText) return;
+    errorText.textContent = message;
+    errorDiv.classList.add('show');
+    setTimeout(function () {
+        errorDiv.classList.remove('show');
+    }, 5000);
+}
+
+(function init() {
+    var dateInput = document.querySelector('input[name="visit_date"]');
+    if (dateInput && !dateInput.value) {
+        var today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+    showPage(1);
+})();
 </script>
 </body>
 </html>
-
