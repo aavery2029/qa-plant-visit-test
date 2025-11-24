@@ -813,158 +813,186 @@
 
     
 <script>
-// QA Plant Visit - Email Submit Version (simplified JS, wide browser support)
-var currentPage = 1;
-var totalPages = 2;
-var pages = document.querySelectorAll('.page');
-var prevBtn = document.getElementById('prevBtn');
-var nextBtn = document.getElementById('nextBtn');
-var submitBtn = document.getElementById('submitBtn');
-var progressFill = document.getElementById('progressFill');
-var currentPageSpan = document.getElementById('currentPage');
+console.log('QA Form Script Loading (auto-email to server)...');
+
+// ========= CONFIG =========
+const GOOGLE_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'; // replace after you deploy Apps Script
+
+// ========= PAGE NAV =========
+let currentPage = 1;
+const totalPages = 2;
+const pages = document.querySelectorAll('.page');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const submitBtn = document.getElementById('submitBtn');
+const progressFill = document.getElementById('progressFill');
+const currentPageSpan = document.getElementById('currentPage');
 
 function showPage(pageNum) {
-    for (var i = 0; i < pages.length; i++) {
-        pages[i].classList.remove('active');
-        if (i === pageNum - 1) {
-            pages[i].classList.add('active');
+    pages.forEach((page, index) => {
+        page.classList.remove('active');
+        if (index === pageNum - 1) {
+            page.classList.add('active');
         }
-    }
+    });
+
     currentPage = pageNum;
-    if (currentPageSpan) currentPageSpan.textContent = String(pageNum);
+    if (currentPageSpan) currentPageSpan.textContent = pageNum;
+
     if (progressFill) {
-        var progress = (pageNum / totalPages) * 100;
+        const progress = (pageNum / totalPages) * 100;
         progressFill.style.width = progress + '%';
     }
-    if (prevBtn) prevBtn.style.display = (pageNum === 1) ? 'none' : 'block';
-    if (nextBtn) nextBtn.style.display = (pageNum === totalPages) ? 'none' : 'block';
-    if (submitBtn) submitBtn.style.display = (pageNum === totalPages) ? 'block' : 'none';
+
+    if (prevBtn) prevBtn.style.display = pageNum === 1 ? 'none' : 'block';
+    if (nextBtn) nextBtn.style.display = pageNum === totalPages ? 'none' : 'block';
+    if (submitBtn) submitBtn.style.display = pageNum === totalPages ? 'block' : 'none';
 }
 
-if (nextBtn) nextBtn.addEventListener('click', function () {
-    if (validatePage(currentPage)) {
-        showPage(currentPage + 1);
+if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+        if (validatePage(currentPage)) {
+            showPage(currentPage + 1);
+            window.scrollTo(0, 0);
+        }
+    });
+}
+
+if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+        showPage(currentPage - 1);
         window.scrollTo(0, 0);
-    }
-});
+    });
+}
 
-if (prevBtn) prevBtn.addEventListener('click', function () {
-    showPage(currentPage - 1);
-    window.scrollTo(0, 0);
-});
-
-var regionSelect = document.getElementById('regionSelect');
-var houstonLocations = document.getElementById('houstonLocations');
+// ========= REGION / HOUSTON =========
+const regionSelect = document.getElementById('regionSelect');
+const houstonLocations = document.getElementById('houstonLocations');
 
 if (regionSelect && houstonLocations) {
     regionSelect.addEventListener('change', function () {
-        var select = houstonLocations.querySelector('select');
+        const select = houstonLocations.querySelector('select');
+
+        // hide by default
         houstonLocations.classList.add('hidden');
         houstonLocations.style.display = 'none';
         if (select) {
             select.removeAttribute('required');
             select.value = '';
         }
+
         if (this.value === 'Houston') {
             houstonLocations.classList.remove('hidden');
             houstonLocations.style.display = 'block';
-            if (select) select.setAttribute('required', 'required');
+            if (select) {
+                select.setAttribute('required', 'required');
+            }
         }
     });
 }
 
-var photoUpload = document.getElementById('photoUpload');
-var fileList = document.getElementById('fileList');
-var uploadedFiles = [];
+// ========= FILE UPLOAD =========
+const photoUpload = document.getElementById('photoUpload');
+const fileList = document.getElementById('fileList');
+let uploadedFiles = [];
 
 if (photoUpload && fileList) {
-    photoUpload.addEventListener('change', function () {
-        var files = Array.prototype.slice.call(photoUpload.files || []);
-        function handleFile(index) {
-            if (index >= files.length) {
-                displayFiles();
-                photoUpload.value = '';
-                return;
+    photoUpload.addEventListener('change', async function (e) {
+        const files = Array.from(e.target.files || []);
+
+        if (uploadedFiles.length + files.length > 5) {
+            showError('Maximum 5 files allowed');
+            photoUpload.value = '';
+            return;
+        }
+
+        for (let file of files) {
+            if (!file.type || !file.type.startsWith('image/')) {
+                showError('Please upload only image files');
+                continue;
             }
-            var file = files[index];
-            if (!file.type || file.type.indexOf('image/') !== 0) {
-                showError('Please upload only image files.');
-                return handleFile(index + 1);
-            }
+
             if (file.size > 10 * 1024 * 1024) {
                 showError('File ' + file.name + ' is too large. Maximum size is 10MB.');
-                return handleFile(index + 1);
+                continue;
             }
-            compressImage(file, function (err, dataUrl) {
-                if (!err && dataUrl) {
-                    uploadedFiles.push({ name: file.name, data: dataUrl });
-                }
-                handleFile(index + 1);
-            });
+
+            try {
+                const compressedImage = await compressImage(file);
+                uploadedFiles.push({ name: file.name, data: compressedImage });
+            } catch (err) {
+                console.error('Error processing image:', err);
+                showError('Failed to process ' + file.name);
+            }
         }
-        handleFile(0);
+
+        displayFiles();
+        photoUpload.value = '';
     });
 }
 
-function compressImage(file, callback) {
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        var img = new Image();
-        img.onload = function () {
-            var width = img.width;
-            var height = img.height;
-            var MAX = 1920;
-            if (width > MAX || height > MAX) {
-                if (width > height) {
-                    height = Math.round((height / width) * MAX);
-                    width = MAX;
-                } else {
-                    width = Math.round((width / height) * MAX);
-                    height = MAX;
+function compressImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                let width = img.width;
+                let height = img.height;
+                const MAX = 1920;
+
+                if (width > MAX || height > MAX) {
+                    if (width > height) {
+                        height = (height / width) * MAX;
+                        width = MAX;
+                    } else {
+                        width = (width / height) * MAX;
+                        height = MAX;
+                    }
                 }
-            }
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            try {
-                var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                callback(null, dataUrl);
-            } catch (e2) {
-                callback(e2);
-            }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                try {
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    resolve(dataUrl);
+                } catch (e2) {
+                    reject(e2);
+                }
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
         };
-        img.onerror = function (err) { callback(err); };
-        img.src = e.target.result;
-    };
-    reader.onerror = function (err) { callback(err); };
-    reader.readAsDataURL(file);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function displayFiles() {
     if (!fileList) return;
     fileList.innerHTML = '';
-    for (var i = 0; i < uploadedFiles.length; i++) {
-        var file = uploadedFiles[i];
-        var preview = document.createElement('div');
+    uploadedFiles.forEach((file, index) => {
+        const preview = document.createElement('div');
         preview.className = 'image-preview';
-        var img = document.createElement('img');
+
+        const img = document.createElement('img');
         img.src = file.data;
         img.alt = file.name;
         preview.appendChild(img);
-        var btn = document.createElement('button');
+
+        const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'remove-btn';
         btn.textContent = 'x';
-        (function (index) {
-            btn.addEventListener('click', function () {
-                removeFile(index);
-            });
-        })(i);
+        btn.addEventListener('click', () => {
+            removeFile(index);
+        });
         preview.appendChild(btn);
         fileList.appendChild(preview);
-    }
+    });
 }
 
 function removeFile(index) {
@@ -972,33 +1000,30 @@ function removeFile(index) {
     displayFiles();
 }
 
+// ========= VALIDATION =========
 function validatePage(pageNum) {
-    var currentPageDiv = document.getElementById('page' + pageNum);
+    const currentPageDiv = document.getElementById('page' + pageNum);
     if (!currentPageDiv) return true;
-    var requiredFields = currentPageDiv.querySelectorAll('[required]');
-    var isValid = true;
-    var firstInvalidField = null;
-    for (var i = 0; i < requiredFields.length; i++) {
-        var field = requiredFields[i];
-        var formGroup = field.closest ? field.closest('.form-group') : null;
+
+    const requiredFields = currentPageDiv.querySelectorAll('[required]');
+    let isValid = true;
+    let firstInvalidField = null;
+
+    requiredFields.forEach(field => {
+        const formGroup = field.closest ? field.closest('.form-group') : null;
         if (formGroup && formGroup.classList.contains('hidden')) {
-            continue;
+            return;
         }
+
         if (field.type === 'radio') {
-            var group = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
-            var checked = false;
-            for (var j = 0; j < group.length; j++) {
-                if (group[j].checked) {
-                    checked = true;
-                    break;
-                }
-            }
+            const radios = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
+            const checked = Array.from(radios).some(r => r.checked);
             if (!checked) {
                 isValid = false;
                 if (!firstInvalidField) firstInvalidField = field;
             }
         } else {
-            if (!field.value || field.value.replace(/\s+/g, '') === '') {
+            if (!field.value || field.value.trim() === '') {
                 isValid = false;
                 field.style.borderColor = '#dc2626';
                 if (!firstInvalidField) firstInvalidField = field;
@@ -1006,84 +1031,85 @@ function validatePage(pageNum) {
                 field.style.borderColor = '';
             }
         }
-    }
+    });
+
     if (!isValid) {
         showError('Please fill in all required fields.');
         if (firstInvalidField && firstInvalidField.scrollIntoView) {
             firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
+
     return isValid;
 }
 
-var formEl = document.getElementById('qaForm');
+// ========= SUBMIT TO SERVER =========
+const formEl = document.getElementById('qaForm');
 if (formEl) {
     formEl.setAttribute('novalidate', 'novalidate');
+
     formEl.addEventListener('submit', function (e) {
         e.preventDefault();
+
         if (!validatePage(currentPage)) return;
-        var loadingSpinner = document.getElementById('loadingSpinner');
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
         if (loadingSpinner) loadingSpinner.classList.add('show');
-        var formData = new FormData(formEl);
-        var data = {};
-        formData.forEach(function (value, key) { data[key] = value; });
-        var targetEmail = data.email;
-        if (!targetEmail) {
-            if (loadingSpinner) loadingSpinner.classList.remove('show');
-            showError('Please enter a valid email address in the "Your Email" field.');
-            return;
-        }
-        var bodyLines = [];
-        bodyLines.push('QA Plant Visit Checklist');
-        bodyLines.push('----------------------------------------');
-        bodyLines.push('');
-        for (var key in data) {
-            if (!data.hasOwnProperty(key)) continue;
-            if (key === 'email') continue;
-            if (key === 'photos') continue;
-            var label = key.replace(/_/g, ' ');
-            bodyLines.push(label + ': ' + data[key]);
-        }
+
+        const formData = new FormData(formEl);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        data.timestamp = new Date().toISOString();
         if (uploadedFiles.length > 0) {
-            bodyLines.push('');
-            bodyLines.push('Photos: ' + uploadedFiles.length + ' image file(s) were selected in this report.');
-            bodyLines.push('(Note: Attach photos manually in your email client if they are not auto-attached.)');
+            data.images = uploadedFiles.map(f => ({ name: f.name, data: f.data }));
         }
-        bodyLines.push('');
-        var now = new Date();
-        bodyLines.push('Submitted at: ' + now.toLocaleString());
-        var subject = 'QA Plant Visit Checklist';
-        var mailtoLink = 'mailto:' + encodeURIComponent(targetEmail) +
-            '?subject=' + encodeURIComponent(subject) +
-            '&body=' + encodeURIComponent(bodyLines.join('\r\n'));
-        if (loadingSpinner) loadingSpinner.classList.remove('show');
-        window.location.href = mailtoLink;
-        formEl.style.display = 'none';
-        var success = document.getElementById('successMessage');
-        if (success) success.classList.add('show');
-        window.scrollTo(0, 0);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            if (loadingSpinner) loadingSpinner.classList.remove('show');
+            formEl.style.display = 'none';
+            const success = document.getElementById('successMessage');
+            if (success) success.classList.add('show');
+            window.scrollTo(0, 0);
+        }).catch(err => {
+            console.error('Submit error:', err);
+            if (loadingSpinner) loadingSpinner.classList.remove('show');
+            showError('Submission failed. Please try again.');
+        });
     });
+} else {
+    console.error('qaForm element not found!');
 }
 
+// ========= ERROR + INIT =========
 function showError(message) {
-    var errorDiv = document.getElementById('errorMessage');
-    var errorText = document.getElementById('errorText');
+    const errorDiv = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
     if (!errorDiv || !errorText) return;
     errorText.textContent = message;
     errorDiv.classList.add('show');
-    setTimeout(function () {
+    setTimeout(() => {
         errorDiv.classList.remove('show');
     }, 5000);
 }
 
-(function init() {
-    var dateInput = document.querySelector('input[name="visit_date"]');
+document.addEventListener('DOMContentLoaded', function () {
+    const dateInput = document.querySelector('input[name="visit_date"]');
     if (dateInput && !dateInput.value) {
-        var today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
     }
     showPage(1);
-})();
+});
 </script>
 </body>
 </html>
+
+
