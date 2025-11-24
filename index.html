@@ -816,7 +816,7 @@
 console.log('QA Form Script Loading (auto-email to server)...');
 
 // ========= CONFIG =========
-const GOOGLE_SCRIPT_URL ='https://script.google.com/macros/s/AKfycbxGEpyLRE4_TQedPmwDRoa6D4-mNmLk34QljKL8ciEVzEeERPaE8zk9l7aEt69RNh-O/exec'; // replace after you deploy Apps Script
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGEpyLRE4_TQedPmwDRoa6D4-mNmLk34QljKL8ciEVzEeERPaE8zk9l7aEt69RNh-O/exec';
 
 // ========= PAGE NAV =========
 let currentPage = 1;
@@ -873,7 +873,6 @@ if (regionSelect && houstonLocations) {
     regionSelect.addEventListener('change', function () {
         const select = houstonLocations.querySelector('select');
 
-        // hide by default
         houstonLocations.classList.add('hidden');
         houstonLocations.style.display = 'none';
         if (select) {
