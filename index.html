@@ -498,8 +498,8 @@
                         </div>
 
                         <!-- Houston Plant Locations - EXACT 15 LOCATIONS -->
-                        <div class="form-group hidden" id="houstonLocations">
-                            <label>Houston Plant Location <span class="required">*</span></label>
+                           <div class="form-group" id="houstonLocations">
+                               <label>Houston Plant Location <span class="required">*</span></label>
                             <select name="houston_location">
                                 <option value="">-- Select Plant --</option>
                                 <option value="140 - JERSEY VILLAGE 1&2">140 - JERSEY VILLAGE 1&2</option>
@@ -865,30 +865,6 @@ if (prevBtn) {
     });
 }
 
-// ========= REGION / HOUSTON =========
-const regionSelect = document.getElementById('regionSelect');
-const houstonLocations = document.getElementById('houstonLocations');
-
-if (regionSelect && houstonLocations) {
-    regionSelect.addEventListener('change', function () {
-        const select = houstonLocations.querySelector('select');
-
-        houstonLocations.classList.add('hidden');
-        houstonLocations.style.display = 'none';
-        if (select) {
-            select.removeAttribute('required');
-            select.value = '';
-        }
-
-        if (this.value === 'Houston') {
-            houstonLocations.classList.remove('hidden');
-            houstonLocations.style.display = 'block';
-            if (select) {
-                select.setAttribute('required', 'required');
-            }
-        }
-    });
-}
 
 // ========= FILE UPLOAD =========
 const photoUpload = document.getElementById('photoUpload');
