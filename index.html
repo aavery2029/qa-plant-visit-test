@@ -496,29 +496,34 @@
                                 <option value="Houston">Houston</option>
                             </select>
                         </div>
+<div class="form-group">
+    <label>Region/Area <span class="required">*</span></label>
+    <!-- Houston is fixed and read-only; no dropdown logic needed -->
+    <input type="text" name="region" value="Houston" readonly>
+</div>
 
-                        <!-- Houston Plant Locations - EXACT 15 LOCATIONS -->
-                           <div class="form-group" id="houstonLocations">
-                               <label>Houston Plant Location <span class="required">*</span></label>
-                            <select name="houston_location">
-                                <option value="">-- Select Plant --</option>
-                                <option value="140 - JERSEY VILLAGE 1&2">140 - JERSEY VILLAGE 1&2</option>
-                                <option value="142 - GREENSPOINT">142 - GREENSPOINT</option>
-                                <option value="143 - FULTON 1&2">143 - FULTON 1&2</option>
-                                <option value="144 - RENWICK 1&2">144 - RENWICK 1&2</option>
-                                <option value="146 - BAYPORT">146 - BAYPORT</option>
-                                <option value="147 - ELLINGTON">147 - ELLINGTON</option>
-                                <option value="148 - MYKAWA">148 - MYKAWA</option>
-                                <option value="149 - CINCO">149 - CINCO</option>
-                                <option value="150 - TUF-CRETE">150 - TUF-CRETE</option>
-                                <option value="151 - BAYTOWN">151 - BAYTOWN</option>
-                                <option value="153 - TOMBALL">153 - TOMBALL</option>
-                                <option value="154 - HOLMES RD 1&2">154 - HOLMES RD 1&2</option>
-                                <option value="156 - KATY">156 - KATY</option>
-                                <option value="157 - RICHMOND">157 - RICHMOND</option>
-                                <option value="160 - HOCKLEY">160 - HOCKLEY</option>
-                            </select>
-                        </div>
+<!-- Houston Plant Locations - ALWAYS VISIBLE -->
+<div class="form-group">
+    <label>Houston Plant Location <span class="required">*</span></label>
+    <select name="houston_location" required>
+        <option value="">-- Select Plant --</option>
+        <option value="140 - JERSEY VILLAGE 1&2">140 - JERSEY VILLAGE 1&2</option>
+        <option value="142 - GREENSPOINT">142 - GREENSPOINT</option>
+        <option value="143 - FULTON 1&2">143 - FULTON 1&2</option>
+        <option value="144 - RENWICK 1&2">144 - RENWICK 1&2</option>
+        <option value="146 - BAYPORT">146 - BAYPORT</option>
+        <option value="147 - ELLINGTON">147 - ELLINGTON</option>
+        <option value="148 - MYKAWA">148 - MYKAWA</option>
+        <option value="149 - CINCO">149 - CINCO</option>
+        <option value="150 - TUF-CRETE">150 - TUF-CRETE</option>
+        <option value="151 - BAYTOWN">151 - BAYTOWN</option>
+        <option value="153 - TOMBALL">153 - TOMBALL</option>
+        <option value="154 - HOLMES RD 1&2">154 - HOLMES RD 1&2</option>
+        <option value="156 - KATY">156 - KATY</option>
+        <option value="157 - RICHMOND">157 - RICHMOND</option>
+        <option value="160 - HOCKLEY">160 - HOCKLEY</option>
+    </select>
+</div>
 
                         <div class="form-group">
                             <label>QA Observer Name <span class="required">*</span></label>
@@ -813,274 +818,210 @@
 
     
 <script>
-console.log('QA Form Script Loading (auto-email to server)...');
+console.log('QA Form Script Loading (auto-email to server, Houston-only)...');
 
-// ========= CONFIG =========
-const GOOGLE_SCRIPT_URL = const GOOGLE_SCRIPT_URL = "https://qa-api-proxy.vercel.app/api/submit";
+// Backend endpoint (Vercel proxy that forwards to Apps Script)
+const GOOGLE_SCRIPT_URL = "https://qa-api-proxy.vercel.app/api/submit";
 
-// ========= PAGE NAV =========
-let currentPage = 1;
-const totalPages = 2;
-const pages = document.querySelectorAll('.page');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const submitBtn = document.getElementById('submitBtn');
-const progressFill = document.getElementById('progressFill');
-const currentPageSpan = document.getElementById('currentPage');
-
-function showPage(pageNum) {
-    pages.forEach((page, index) => {
-        page.classList.remove('active');
-        if (index === pageNum - 1) {
-            page.classList.add('active');
-        }
-    });
-
-    currentPage = pageNum;
-    if (currentPageSpan) currentPageSpan.textContent = pageNum;
-
-    if (progressFill) {
-        const progress = (pageNum / totalPages) * 100;
-        progressFill.style.width = progress + '%';
-    }
-
-    if (prevBtn) prevBtn.style.display = pageNum === 1 ? 'none' : 'block';
-    if (nextBtn) nextBtn.style.display = pageNum === totalPages ? 'none' : 'block';
-    if (submitBtn) submitBtn.style.display = pageNum === totalPages ? 'block' : 'none';
-}
-
-if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-        if (validatePage(currentPage)) {
-            showPage(currentPage + 1);
-            window.scrollTo(0, 0);
-        }
-    });
-}
-
-if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-        showPage(currentPage - 1);
-        window.scrollTo(0, 0);
-    });
-}
-
-
-// ========= FILE UPLOAD =========
-const photoUpload = document.getElementById('photoUpload');
-const fileList = document.getElementById('fileList');
+// Will hold compressed / encoded image files
 let uploadedFiles = [];
+let currentPage = 1;
 
-if (photoUpload && fileList) {
-    photoUpload.addEventListener('change', async function (e) {
-        const files = Array.from(e.target.files || []);
+document.addEventListener('DOMContentLoaded', () => {
+    const pages = document.querySelectorAll('.page');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressFill = document.getElementById('progressFill');
+    const currentPageSpan = document.getElementById('currentPage');
+    const formEl = document.getElementById('qaForm');
+    const photoUpload = document.getElementById('photoUpload');
+    const fileList = document.getElementById('fileList');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const totalPages = pages.length;
 
-        if (uploadedFiles.length + files.length > 5) {
-            showError('Maximum 5 files allowed');
-            photoUpload.value = '';
-            return;
-        }
-
-        for (let file of files) {
-            if (!file.type || !file.type.startsWith('image/')) {
-                showError('Please upload only image files');
-                continue;
+    // ========== PAGE NAVIGATION ==========
+    function showPage(pageNum) {
+        pages.forEach((page, index) => {
+            page.classList.remove('active');
+            if (index === pageNum - 1) {
+                page.classList.add('active');
             }
-
-            if (file.size > 10 * 1024 * 1024) {
-                showError('File ' + file.name + ' is too large. Maximum size is 10MB.');
-                continue;
-            }
-
-            try {
-                const compressedImage = await compressImage(file);
-                uploadedFiles.push({ name: file.name, data: compressedImage });
-            } catch (err) {
-                console.error('Error processing image:', err);
-                showError('Failed to process ' + file.name);
-            }
-        }
-
-        displayFiles();
-        photoUpload.value = '';
-    });
-}
-
-function compressImage(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const img = new Image();
-            img.onload = function () {
-                let width = img.width;
-                let height = img.height;
-                const MAX = 1920;
-
-                if (width > MAX || height > MAX) {
-                    if (width > height) {
-                        height = (height / width) * MAX;
-                        width = MAX;
-                    } else {
-                        width = (width / height) * MAX;
-                        height = MAX;
-                    }
-                }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                try {
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    resolve(dataUrl);
-                } catch (e2) {
-                    reject(e2);
-                }
-            };
-            img.onerror = reject;
-            img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-function displayFiles() {
-    if (!fileList) return;
-    fileList.innerHTML = '';
-    uploadedFiles.forEach((file, index) => {
-        const preview = document.createElement('div');
-        preview.className = 'image-preview';
-
-        const img = document.createElement('img');
-        img.src = file.data;
-        img.alt = file.name;
-        preview.appendChild(img);
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'remove-btn';
-        btn.textContent = 'x';
-        btn.addEventListener('click', () => {
-            removeFile(index);
         });
-        preview.appendChild(btn);
-        fileList.appendChild(preview);
-    });
-}
 
-function removeFile(index) {
-    uploadedFiles.splice(index, 1);
-    displayFiles();
-}
+        currentPage = pageNum;
+        if (currentPageSpan) currentPageSpan.textContent = pageNum;
 
-// ========= VALIDATION =========
-function validatePage(pageNum) {
-    const currentPageDiv = document.getElementById('page' + pageNum);
-    if (!currentPageDiv) return true;
-
-    const requiredFields = currentPageDiv.querySelectorAll('[required]');
-    let isValid = true;
-    let firstInvalidField = null;
-
-    requiredFields.forEach(field => {
-        const formGroup = field.closest ? field.closest('.form-group') : null;
-        if (formGroup && formGroup.classList.contains('hidden')) {
-            return;
+        if (progressFill) {
+            const progress = (pageNum / totalPages) * 100;
+            progressFill.style.width = progress + '%';
         }
 
-        if (field.type === 'radio') {
-            const radios = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
-            const checked = Array.from(radios).some(r => r.checked);
-            if (!checked) {
-                isValid = false;
-                if (!firstInvalidField) firstInvalidField = field;
-            }
-        } else {
-            if (!field.value || field.value.trim() === '') {
-                isValid = false;
-                field.style.borderColor = '#dc2626';
-                if (!firstInvalidField) firstInvalidField = field;
-            } else {
-                field.style.borderColor = '';
-            }
-        }
-    });
-
-    if (!isValid) {
-        showError('Please fill in all required fields.');
-        if (firstInvalidField && firstInvalidField.scrollIntoView) {
-            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        if (prevBtn) prevBtn.style.display = pageNum === 1 ? 'none' : 'block';
+        if (nextBtn) nextBtn.style.display = pageNum === totalPages ? 'none' : 'block';
+        if (submitBtn) submitBtn.style.display = pageNum === totalPages ? 'block' : 'none';
     }
 
-    return isValid;
-}
+    // ========== ERROR BANNER ==========
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        if (!errorDiv || !errorText) return;
+        errorText.textContent = message;
+        errorDiv.classList.add('show');
+        setTimeout(() => {
+            errorDiv.classList.remove('show');
+        }, 5000);
+    }
 
-// ========= SUBMIT TO SERVER =========
-const formEl = document.getElementById('qaForm');
-if (formEl) {
-    formEl.setAttribute('novalidate', 'novalidate');
+    // ========== PAGE VALIDATION ==========
+    function validatePage(pageNum) {
+        const pageIndex = pageNum - 1;
+        const page = pages[pageIndex];
+        if (!page) return true;
 
-    formEl.addEventListener('submit', function (e) {
-        e.preventDefault();
+        let isValid = true;
+        const fields = page.querySelectorAll('input, select, textarea');
 
-        if (!validatePage(currentPage)) return;
-
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        if (loadingSpinner) loadingSpinner.classList.add('show');
-
-        const formData = new FormData(formEl);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
+        fields.forEach(field => {
+            field.classList.remove('invalid');
+            if (!field.checkValidity()) {
+                isValid = false;
+                field.classList.add('invalid');
+            }
         });
 
-        data.timestamp = new Date().toISOString();
-        if (uploadedFiles.length > 0) {
-            data.images = uploadedFiles.map(f => ({ name: f.name, data: f.data }));
+        if (!isValid) {
+            showError('Please complete all required fields on this page.');
+            const firstInvalid = page.querySelector('.invalid');
+            if (firstInvalid && typeof firstInvalid.scrollIntoView === 'function') {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(() => {
-            if (loadingSpinner) loadingSpinner.classList.remove('show');
-            formEl.style.display = 'none';
-            const success = document.getElementById('successMessage');
-            if (success) success.classList.add('show');
-            window.scrollTo(0, 0);
-        }).catch(err => {
-            console.error('Submit error:', err);
-            if (loadingSpinner) loadingSpinner.classList.remove('show');
-            showError('Submission failed. Please try again.');
+        return isValid;
+    }
+
+    // ========== FILE UPLOAD / IMAGE HANDLING ==========
+    function displayFiles() {
+        if (!fileList) return;
+        fileList.innerHTML = '';
+        uploadedFiles.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+                <span>${file.name}</span>
+                <button type="button" data-index="${index}">Remove</button>
+            `;
+            fileList.appendChild(item);
         });
-    });
-} else {
-    console.error('qaForm element not found!');
-}
+    }
 
-// ========= ERROR + INIT =========
-function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
-    if (!errorDiv || !errorText) return;
-    errorText.textContent = message;
-    errorDiv.classList.add('show');
-    setTimeout(() => {
-        errorDiv.classList.remove('show');
-    }, 5000);
-}
+    if (photoUpload && fileList) {
+        photoUpload.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files || []);
 
-document.addEventListener('DOMContentLoaded', function () {
+            if (uploadedFiles.length + files.length > 5) {
+                showError('Maximum 5 files allowed');
+                photoUpload.value = '';
+                return;
+            }
+
+            files.forEach(file => {
+                const isImage = file.type && file.type.startsWith('image/');
+                const isPdf = file.type === 'application/pdf';
+                if (!isImage && !isPdf) {
+                    showError('Please upload only JPG, PNG, or PDF files');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('File ' + file.name + ' is too large (max 10MB).');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedFiles.push({
+                        name: file.name,
+                        data: evt.target.result  // base64 Data URL
+                    });
+                    displayFiles();
+                };
+                reader.onerror = function() {
+                    showError('Failed to read file: ' + file.name);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            photoUpload.value = '';
+        });
+
+        fileList.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-index]');
+            if (!btn) return;
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            if (!isNaN(idx)) {
+                uploadedFiles.splice(idx, 1);
+                displayFiles();
+            }
+        });
+    }
+
+    // ========== FORM SUBMIT TO SERVER ==========
+    if (formEl) {
+        formEl.setAttribute('novalidate', 'novalidate');
+
+        formEl.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (!validatePage(currentPage)) return;
+
+            if (loadingSpinner) loadingSpinner.classList.add('show');
+
+            const formData = new FormData(formEl);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // Add timestamp & images for backend / PDF
+            data.timestamp = new Date().toISOString();
+            if (uploadedFiles.length > 0) {
+                data.images = uploadedFiles.map(f => ({
+                    name: f.name,
+                    data: f.data
+                }));
+            }
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => {
+                if (loadingSpinner) loadingSpinner.classList.remove('show');
+                formEl.style.display = 'none';
+                const success = document.getElementById('successMessage');
+                if (success) success.classList.add('show');
+                window.scrollTo(0, 0);
+            }).catch(err => {
+                console.error('Submit error:', err);
+                if (loadingSpinner) loadingSpinner.classList.remove('show');
+                showError('Submission failed. Please try again.');
+            });
+        });
+    } else {
+        console.error('qaForm element not found!');
+    }
+
+    // ========== DEFAULT DATE & INITIAL PAGE ==========
     const dateInput = document.querySelector('input[name="visit_date"]');
     if (dateInput && !dateInput.value) {
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
     }
+
     showPage(1);
 });
 </script>
