@@ -481,52 +481,64 @@
             <form id="qaForm" novalidate>
                 <!-- PAGE 1 -->
                 <div class="page active" id="page1">
-                    <div class="form-section">
-                        <h3>Basic Information</h3>
-                        
-                        <div class="form-group">
-                            <label>Date <span class="required">*</span></label>
-                            <input type="date" name="visit_date" required>
-                        </div>
-    
-<!-- Houston Plant Locations - ALWAYS VISIBLE -->
-<div class="form-group">
-    <label>Houston Plant Location <span class="required">*</span></label>
-    <select name="houston_location" required>
-        <option value="">-- Select Plant --</option>
-        <option value="140 - JERSEY VILLAGE 1&2">140 - JERSEY VILLAGE 1&2</option>
-        <option value="142 - GREENSPOINT">142 - GREENSPOINT</option>
-        <option value="143 - FULTON 1&2">143 - FULTON 1&2</option>
-        <option value="144 - RENWICK 1&2">144 - RENWICK 1&2</option>
-        <option value="146 - BAYPORT">146 - BAYPORT</option>
-        <option value="147 - ELLINGTON">147 - ELLINGTON</option>
-        <option value="148 - MYKAWA">148 - MYKAWA</option>
-        <option value="149 - CINCO">149 - CINCO</option>
-        <option value="150 - TUF-CRETE">150 - TUF-CRETE</option>
-        <option value="151 - BAYTOWN">151 - BAYTOWN</option>
-        <option value="153 - TOMBALL">153 - TOMBALL</option>
-        <option value="154 - HOLMES RD 1&2">154 - HOLMES RD 1&2</option>
-        <option value="156 - KATY">156 - KATY</option>
-        <option value="157 - RICHMOND">157 - RICHMOND</option>
-        <option value="160 - HOCKLEY">160 - HOCKLEY</option>
-    </select>
+                    
+<div class="form-section">
+    <h3>BASIC INFORMATION</h3>
+
+    <div class="form-group">
+        <label>Date <span class="required">*</span></label>
+        <input type="date" name="visit_date" required>
+    </div>
+
+    <!-- Houston-Only: Region removed completely -->
+
+    <div class="form-group">
+        <label>Houston Plant Location <span class="required">*</span></label>
+        <select name="houston_location" id="houstonLocations" required>
+            <option value="">-- Select Plant --</option>
+
+            <option value="691 - JERSEY VILLAGE (RM01)">691 - JERSEY VILLAGE (RM01)</option>
+            <option value="692 - GREENSPOINT (RM02)">692 - GREENSPOINT (RM02)</option>
+            <option value="693 - FULTON (RM03)">693 - FULTON (RM03)</option>
+            <option value="694 - RENWICK (RM04)">694 - RENWICK (RM04)</option>
+            <option value="695 - BAYPORT (RM05)">695 - BAYPORT (RM05)</option>
+            <option value="696 - ELLINGTON (RM06)">696 - ELLINGTON (RM06)</option>
+            <option value="697 - CINCO (RM07)">697 - CINCO (RM07)</option>
+            <option value="698 - TUF-CRETE (RM08)">698 - TUF-CRETE (RM08)</option>
+            <option value="699 - BAYTOWN (RM09)">699 - BAYTOWN (RM09)</option>
+            <option value="700 - TOMBALL (RM10)">700 - TOMBALL (RM10)</option>
+            <option value="701 - HOLMES RD (RM11)">701 - HOLMES RD (RM11)</option>
+            <option value="702 - HOCKLEY (RM12)">702 - HOCKLEY (RM12)</option>
+            <option value="703 - CROSBY (RM13)">703 - CROSBY (RM13)</option>
+            <option value="704 - READING ROAD (RM14)">704 - READING ROAD (RM14)</option>
+            <option value="705 - MANVEL (RM15)">705 - MANVEL (RM15)</option>
+            <option value="706 - KATY EAST (RM16)">706 - KATY EAST (RM16)</option>
+            <option value="707 - BROOKSHIRE (RM17)">707 - BROOKSHIRE (RM17)</option>
+            <option value="708 - ANGLETON (HOU-RM18)">708 - ANGLETON (HOU-RM18)</option>
+            <option value="709 - MOORE BAR (RM19)">709 - MOORE BAR (RM19)</option>
+            <option value="710 - NEW CANEY (RM20)">710 - NEW CANEY (RM20)</option>
+            <option value="711 - KATY WEST (RM21)">711 - KATY WEST (RM21)</option>
+            <option value="780 - RICHMOND (RM24)">780 - RICHMOND (RM24)</option>
+
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>QA Observer Name <span class="required">*</span></label>
+        <input type="text" name="observer_name" required>
+    </div>
+
+    <div class="form-group">
+        <label>Plant Manager</label>
+        <input type="text" name="plant_manager">
+    </div>
+
+    <div class="form-group">
+        <label>Operators Present</label>
+        <textarea name="operators_present"></textarea>
+    </div>
 </div>
-
-                        <div class="form-group">
-                            <label>QA Observer Name <span class="required">*</span></label>
-                            <input type="text" name="qa_observer_name" placeholder="Enter your name" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Plant Manager</label>
-                            <input type="text" name="plant_manager" placeholder="Manager name">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Operators Present</label>
-                            <textarea name="operators_present" placeholder="List operators present during visit"></textarea>
-                        </div>
-                    </div>
+>
 
                     <div class="form-section">
                         <h3>Daily Operations</h3>
@@ -805,7 +817,7 @@
 
     
 <script>
-console.log('QA Form Script Loading (auto-email to server, Houston-only)...');
+console.log("Houston-only mode active: Plant list always visible.");
 
 // Backend endpoint (Vercel proxy that forwards to Apps Script)
 const GOOGLE_SCRIPT_URL = "https://qa-api-proxy.vercel.app/api/submit";
