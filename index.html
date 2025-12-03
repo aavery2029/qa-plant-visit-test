@@ -470,7 +470,6 @@
         }
     </style>
 </head>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
 <body>
 <div class="page-shell">
     <div class="card">
@@ -502,15 +501,16 @@
             <div class="error-message" id="errorMessage">
                 <p id="errorText"></p>
             </div>
-<input type="hidden" id="jsonPayload" name="json">
 
-           <form
-  id="qaForm"
-  method="POST"
-  action="https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec"
-  target="hidden_iframe"
-  novalidate
->
+            <form
+              id="qaForm"
+              method="POST"
+              action="https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec"
+              target="hidden_iframe"
+              novalidate
+            >
+                <!-- JSON payload field for Apps Script -->
+                <input type="hidden" id="jsonPayload" name="json">
 
                 <!-- Fixed region for backend/report -->
                 <input type="hidden" name="region" value="Houston">
@@ -884,8 +884,6 @@
                 <div class="footer-note">
                     This form auto-generates the PDF & email using your entries above.
                 </div>
-<input type="hidden" id="jsonPayload" name="json">
-
             </form>
 
             <div class="success-message" id="successMessage">
@@ -904,11 +902,10 @@
     </div>
 </div>
 
-<script>
-    // ========= CONFIG =========
-    // CHANGED: put your real Apps Script Web App URL here
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec";
+<!-- Hidden iframe target for form POST -->
+<iframe name="hidden_iframe" style="display:none;"></iframe>
 
+<script>
     // ========= PAGE NAV =========
     let currentPage = 1;
     const totalPages = 2;
@@ -1124,7 +1121,7 @@
         return isValid;
     }
 
-    // ========= SUBMIT TO SERVER =========
+    // ========= SUBMIT TO SERVER (NO FETCH, NO CORS) =========
     const formEl = document.getElementById('qaForm');
 
     if (formEl) {
@@ -1148,6 +1145,7 @@
             const plantHidden = document.getElementById('plantHidden');
             if (plantSelect && plantHidden) {
                 plantHidden.value = plantSelect.value || '';
+                data.plant = plantSelect.value || '';
             }
 
             data.timestamp = new Date().toISOString();
@@ -1158,66 +1156,21 @@
                 }));
             }
 
-            // CHANGED: remove no-cors and actually read JSON response
+            // Put JSON into hidden field
+            const jsonInput = document.getElementById('jsonPayload');
+            if (jsonInput) {
+                jsonInput.value = JSON.stringify(data);
+            }
 
-  formEl.addEventListener('submit', function (e) {
-    e.preventDefault();
+            // Normal POST to Apps Script (no CORS)
+            formEl.submit();
 
-    if (!validatePage(currentPage)) return;
-
-    if (loadingSpinner) loadingSpinner.classList.add('show');
-
-    const formData = new FormData(formEl);
-    const data = {};
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
-
-    const plantSelect = document.getElementById('plantSelect');
-    const plantHidden = document.getElementById('plantHidden');
-    if (plantSelect && plantHidden) {
-        plantHidden.value = plantSelect.value || '';
-        data.plant = plantSelect.value || '';
-    }
-
-    data.timestamp = new Date().toISOString();
-
-    if (uploadedFiles.length > 0) {
-        data.images = uploadedFiles.map(f => ({
-            name: f.name,
-            data: f.data
-        }));
-    }
-
-    // PUT JSON INTO HIDDEN FIELD
-    const jsonInput = document.getElementById('jsonPayload');
-    jsonInput.value = JSON.stringify(data);
-
-    // SUBMIT FORM NORMALLY to Apps Script (no CORS)
-    formEl.submit();
-
-    // Show success screen immediately
-    if (loadingSpinner) loadingSpinner.classList.remove('show');
-    formEl.style.display = 'none';
-    const success = document.getElementById('successMessage');
-    if (success) success.classList.add('show');
-    window.scrollTo(0, 0);
-});
-  .then(() => {
-        // We can't read the response in no-cors mode, but if we got here,
-        // the browser successfully sent the request.
-        if (loadingSpinner) loadingSpinner.classList.remove('show');
-        formEl.style.display = 'none';
-        const success = document.getElementById('successMessage');
-        if (success) success.classList.add('show');
-        window.scrollTo(0, 0);
-    })
-    .catch(err => {
-        console.error('Submit error:', err);
-        if (loadingSpinner) loadingSpinner.classList.remove('show');
-        showError('Submission failed. ' + (err && err.message ? err.message : 'Please try again.'));
-    });
-
+            // Show success immediately
+            if (loadingSpinner) loadingSpinner.classList.remove('show');
+            formEl.style.display = 'none';
+            const success = document.getElementById('successMessage');
+            if (success) success.classList.add('show');
+            window.scrollTo(0, 0);
         });
     } else {
         console.error('qaForm element not found!');
@@ -1243,7 +1196,5 @@
         showPage(1);
     });
 </script>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 </body>
 </html>
