@@ -1148,35 +1148,27 @@
             }
 
             // CHANGED: remove no-cors and actually read JSON response
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            })
-                .then(async (res) => {
-                    let payload = null;
-                    try {
-                        payload = await res.json();
-                    } catch (err) {
-                        console.warn('Could not parse JSON response', err);
-                    }
 
-                    if (!res.ok || !payload || payload.status !== 'success') {
-                        const msg = (payload && payload.message) ? payload.message : 'Submission failed.';
-                        throw new Error(msg);
-                    }
+        fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',             // <-- key: bypass CORS checks in browser
+    body: JSON.stringify(data)   // no custom headers; Apps Script still sees JSON string
+})
+    .then(() => {
+        // We can't read the response in no-cors mode, but if we got here,
+        // the browser successfully sent the request.
+        if (loadingSpinner) loadingSpinner.classList.remove('show');
+        formEl.style.display = 'none';
+        const success = document.getElementById('successMessage');
+        if (success) success.classList.add('show');
+        window.scrollTo(0, 0);
+    })
+    .catch(err => {
+        console.error('Submit error:', err);
+        if (loadingSpinner) loadingSpinner.classList.remove('show');
+        showError('Submission failed. ' + (err && err.message ? err.message : 'Please try again.'));
+    });
 
-                    if (loadingSpinner) loadingSpinner.classList.remove('show');
-                    formEl.style.display = 'none';
-                    const success = document.getElementById('successMessage');
-                    if (success) success.classList.add('show');
-                    window.scrollTo(0, 0);
-                })
-                .catch(err => {
-                    console.error('Submit error:', err);
-                    if (loadingSpinner) loadingSpinner.classList.remove('show');
-                    showError('Submission failed. ' + (err && err.message ? err.message : 'Please try again.'));
-                });
         });
     } else {
         console.error('qaForm element not found!');
