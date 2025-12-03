@@ -502,16 +502,7 @@
                 <p id="errorText"></p>
             </div>
 
-            <form
-              id="qaForm"
-              method="POST"
-              action="https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec"
-              target="hidden_iframe"
-              novalidate
-            >
-                <!-- JSON payload field for Apps Script -->
-                <input type="hidden" id="jsonPayload" name="json">
-
+            <form id="qaForm" novalidate>
                 <!-- Fixed region for backend/report -->
                 <input type="hidden" name="region" value="Houston">
                 <!-- Also mirror for “plant” key as a backup -->
@@ -902,299 +893,307 @@
     </div>
 </div>
 
-<!-- Hidden iframe target for form POST -->
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-    // ========= PAGE NAV =========
+  // === CONFIG: Vercel API endpoint that proxies to Apps Script ===
+  const API_URL = "https://qa-api-proxy.vercel.app/api/submit";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Page controls
     let currentPage = 1;
     const totalPages = 2;
 
-    const pages = document.querySelectorAll('.page');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressFill = document.getElementById('progressFill');
-    const currentPageSpan = document.getElementById('currentPage');
-    const totalPagesSpan = document.getElementById('totalPages');
-    const loadingSpinner = document.getElementById('loadingSpinner');
+    const pages = document.querySelectorAll(".page");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const progressFill = document.getElementById("progressFill");
+    const currentPageSpan = document.getElementById("currentPage");
+    const totalPagesSpan = document.getElementById("totalPages");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const formEl = document.getElementById("qaForm");
+    const successMessage = document.getElementById("successMessage");
 
-    if (totalPagesSpan) {
-        totalPagesSpan.textContent = totalPages;
-    }
+    if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
     function showPage(pageNum) {
-        pages.forEach((page, index) => {
-            page.classList.toggle('active', index === pageNum - 1);
-        });
+      pages.forEach((page, index) => {
+        page.classList.toggle("active", index === pageNum - 1);
+      });
 
-        currentPage = pageNum;
-        if (currentPageSpan) currentPageSpan.textContent = pageNum;
+      currentPage = pageNum;
+      if (currentPageSpan) currentPageSpan.textContent = pageNum;
 
-        if (progressFill) {
-            const progress = (pageNum / totalPages) * 100;
-            progressFill.style.width = progress + '%';
-        }
+      if (progressFill) {
+        const progress = (pageNum / totalPages) * 100;
+        progressFill.style.width = progress + "%";
+      }
 
-        if (prevBtn) prevBtn.style.display = pageNum === 1 ? 'none' : 'inline-flex';
-        if (nextBtn) nextBtn.style.display = pageNum === totalPages ? 'none' : 'inline-flex';
-        if (submitBtn) submitBtn.style.display = pageNum === totalPages ? 'inline-flex' : 'none';
+      if (prevBtn) prevBtn.style.display = pageNum === 1 ? "none" : "inline-flex";
+      if (nextBtn) nextBtn.style.display = pageNum === totalPages ? "none" : "inline-flex";
+      if (submitBtn) submitBtn.style.display = pageNum === totalPages ? "inline-flex" : "none";
     }
 
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (validatePage(currentPage)) {
-                showPage(currentPage + 1);
-                window.scrollTo(0, 0);
-            }
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            showPage(currentPage - 1);
-            window.scrollTo(0, 0);
-        });
-    }
-
-    // ========= FILE UPLOAD / IMAGE HANDLING =========
-    const photoUpload = document.getElementById('photoUpload');
-    const fileList = document.getElementById('fileList');
-    let uploadedFiles = [];
-
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.onload = function () {
-                    let width = img.width;
-                    let height = img.height;
-                    const MAX = 1920;
-
-                    if (width > MAX || height > MAX) {
-                        if (width > height) {
-                            height = (height / width) * MAX;
-                            width = MAX;
-                        } else {
-                            width = (width / height) * MAX;
-                            height = MAX;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    try {
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        resolve(dataUrl);
-                    } catch (err) {
-                        reject(err);
-                    }
-                };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function displayFiles() {
-        if (!fileList) return;
-        fileList.innerHTML = '';
-        uploadedFiles.forEach((file, index) => {
-            const preview = document.createElement('div');
-            preview.className = 'image-preview';
-
-            const img = document.createElement('img');
-            img.src = file.data;
-            img.alt = file.name;
-            preview.appendChild(img);
-
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'remove-btn';
-            btn.textContent = 'x';
-            btn.addEventListener('click', () => {
-                removeFile(index);
-            });
-            preview.appendChild(btn);
-
-            fileList.appendChild(preview);
-        });
-    }
-
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        displayFiles();
-    }
-
-    if (photoUpload && fileList) {
-        photoUpload.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files || []);
-
-            if (uploadedFiles.length + files.length > 5) {
-                showError('Maximum 5 files allowed.');
-                photoUpload.value = '';
-                return;
-            }
-
-            for (let file of files) {
-                if (!file.type || !file.type.startsWith('image/')) {
-                    showError('Please upload only image files.');
-                    continue;
-                }
-
-                if (file.size > 10 * 1024 * 1024) {
-                    showError('File ' + file.name + ' is too large (max 10MB).');
-                    continue;
-                }
-
-                try {
-                    const compressedImage = await compressImage(file);
-                    uploadedFiles.push({name: file.name, data: compressedImage});
-                } catch (err) {
-                    console.error('Error processing image:', err);
-                    showError('Failed to process ' + file.name);
-                }
-            }
-
-            displayFiles();
-            photoUpload.value = '';
-        });
-    }
-
-    // ========= VALIDATION =========
+    // === Validation ===
     function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        if (!errorDiv || !errorText) return;
-        errorText.textContent = message;
-        errorDiv.classList.add('show');
-        setTimeout(() => {
-            errorDiv.classList.remove('show');
-        }, 5000);
+      const errorDiv = document.getElementById("errorMessage");
+      const errorText = document.getElementById("errorText");
+      if (!errorDiv || !errorText) return;
+      errorText.textContent = message;
+      errorDiv.classList.add("show");
+      setTimeout(() => {
+        errorDiv.classList.remove("show");
+      }, 5000);
     }
 
     function validatePage(pageNum) {
-        const currentPageDiv = document.getElementById('page' + pageNum);
-        if (!currentPageDiv) return true;
+      const currentPageDiv = document.getElementById("page" + pageNum);
+      if (!currentPageDiv) return true;
 
-        const requiredFields = currentPageDiv.querySelectorAll('[required]');
-        let isValid = true;
-        let firstInvalidField = null;
+      const requiredFields = currentPageDiv.querySelectorAll("[required]");
+      let isValid = true;
+      let firstInvalidField = null;
 
-        requiredFields.forEach(field => {
-            const formGroup = field.closest ? field.closest('.form-group') : null;
-            if (formGroup && formGroup.style.display === 'none') {
-                return;
-            }
+      requiredFields.forEach((field) => {
+        const formGroup = field.closest ? field.closest(".form-group") : null;
+        if (formGroup && formGroup.style.display === "none") return;
 
-            if (field.type === 'radio') {
-                const radios = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
-                const checked = Array.from(radios).some(r => r.checked);
-                if (!checked) {
-                    isValid = false;
-                    if (!firstInvalidField) firstInvalidField = field;
-                }
-            } else {
-                if (!field.value || field.value.trim() === '') {
-                    isValid = false;
-                    field.classList.add('invalid');
-                    if (!firstInvalidField) firstInvalidField = field;
-                } else {
-                    field.classList.remove('invalid');
-                }
-            }
-        });
-
-        if (!isValid) {
-            showError('Please fill in all required fields on this page.');
-            if (firstInvalidField && firstInvalidField.scrollIntoView) {
-                firstInvalidField.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
+        if (field.type === "radio") {
+          const radios = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
+          const checked = Array.from(radios).some((r) => r.checked);
+          if (!checked) {
+            isValid = false;
+            if (!firstInvalidField) firstInvalidField = field;
+          }
+        } else {
+          if (!field.value || field.value.trim() === "") {
+            isValid = false;
+            field.classList.add("invalid");
+            if (!firstInvalidField) firstInvalidField = field;
+          } else {
+            field.classList.remove("invalid");
+          }
         }
+      });
 
-        return isValid;
+      if (!isValid) {
+        showError("Please fill in all required fields on this page.");
+        if (firstInvalidField && firstInvalidField.scrollIntoView) {
+          firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+
+      return isValid;
     }
 
-    // ========= SUBMIT TO SERVER (NO FETCH, NO CORS) =========
-    const formEl = document.getElementById('qaForm');
+    // === File upload / image compression ===
+    const photoUpload = document.getElementById("photoUpload");
+    const fileList = document.getElementById("fileList");
+    let uploadedFiles = [];
 
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            let width = img.width;
+            let height = img.height;
+            const MAX = 1920;
+
+            if (width > MAX || height > MAX) {
+              if (width > height) {
+                height = (height / width) * MAX;
+                width = MAX;
+              } else {
+                width = (width / height) * MAX;
+                height = MAX;
+              }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            try {
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+              resolve(dataUrl);
+            } catch (err) {
+              reject(err);
+            }
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function displayFiles() {
+      if (!fileList) return;
+      fileList.innerHTML = "";
+      uploadedFiles.forEach((file, index) => {
+        const preview = document.createElement("div");
+        preview.className = "image-preview";
+
+        const img = document.createElement("img");
+        img.src = file.data;
+        img.alt = file.name;
+        preview.appendChild(img);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "remove-btn";
+        btn.textContent = "x";
+        btn.addEventListener("click", () => {
+          uploadedFiles.splice(index, 1);
+          displayFiles();
+        });
+        preview.appendChild(btn);
+
+        fileList.appendChild(preview);
+      });
+    }
+
+    if (photoUpload && fileList) {
+      photoUpload.addEventListener("change", async (e) => {
+        const files = Array.from(e.target.files || []);
+
+        if (uploadedFiles.length + files.length > 5) {
+          showError("Maximum 5 files allowed.");
+          photoUpload.value = "";
+          return;
+        }
+
+        for (let file of files) {
+          if (!file.type || !file.type.startsWith("image/")) {
+            showError("Please upload only image files.");
+            continue;
+          }
+
+          if (file.size > 10 * 1024 * 1024) {
+            showError("File " + file.name + " is too large (max 10MB).");
+            continue;
+          }
+
+          try {
+            const compressed = await compressImage(file);
+            uploadedFiles.push({ name: file.name, data: compressed });
+          } catch (err) {
+            console.error("Error processing image:", err);
+            showError("Failed to process " + file.name);
+          }
+        }
+
+        displayFiles();
+        photoUpload.value = "";
+      });
+    }
+
+    // === Page buttons ===
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (validatePage(currentPage)) {
+          showPage(currentPage + 1);
+          window.scrollTo(0, 0);
+        }
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        showPage(currentPage - 1);
+        window.scrollTo(0, 0);
+      });
+    }
+
+    // === Submit handler (via Vercel proxy) ===
     if (formEl) {
-        formEl.setAttribute('novalidate', 'novalidate');
+      formEl.setAttribute("novalidate", "novalidate");
 
-        formEl.addEventListener('submit', function (e) {
-            e.preventDefault();
+      formEl.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            if (!validatePage(currentPage)) return;
+        if (!validatePage(currentPage)) return;
 
-            if (loadingSpinner) loadingSpinner.classList.add('show');
+        if (loadingSpinner) loadingSpinner.classList.add("show");
 
-            const formData = new FormData(formEl);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-
-            // ensure plant mirror for backend
-            const plantSelect = document.getElementById('plantSelect');
-            const plantHidden = document.getElementById('plantHidden');
-            if (plantSelect && plantHidden) {
-                plantHidden.value = plantSelect.value || '';
-                data.plant = plantSelect.value || '';
-            }
-
-            data.timestamp = new Date().toISOString();
-            if (uploadedFiles.length > 0) {
-                data.images = uploadedFiles.map(f => ({
-                    name: f.name,
-                    data: f.data
-                }));
-            }
-
-            // Put JSON into hidden field
-            const jsonInput = document.getElementById('jsonPayload');
-            if (jsonInput) {
-                jsonInput.value = JSON.stringify(data);
-            }
-
-            // Normal POST to Apps Script (no CORS)
-            formEl.submit();
-
-            // Show success immediately
-            if (loadingSpinner) loadingSpinner.classList.remove('show');
-            formEl.style.display = 'none';
-            const success = document.getElementById('successMessage');
-            if (success) success.classList.add('show');
-            window.scrollTo(0, 0);
+        const formData = new FormData(formEl);
+        const data = {};
+        formData.forEach((value, key) => {
+          data[key] = value;
         });
+
+        // keep plant mirror for backend
+        const plantSelect = document.getElementById("plantSelect");
+        const plantHidden = document.getElementById("plantHidden");
+        if (plantSelect && plantHidden) {
+          plantHidden.value = plantSelect.value || "";
+          data.plant = plantSelect.value || "";
+        }
+
+        data.timestamp = new Date().toISOString();
+        if (uploadedFiles.length > 0) {
+          data.images = uploadedFiles.map((f) => ({
+            name: f.name,
+            data: f.data,
+          }));
+        }
+
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          let payload = null;
+          try {
+            payload = await res.json();
+          } catch (err) {
+            console.warn("Could not parse JSON response", err);
+          }
+
+          if (!res.ok || !payload || payload.status !== "success") {
+            const msg = payload && payload.message ? payload.message : "Submission failed.";
+            throw new Error(msg);
+          }
+
+          if (loadingSpinner) loadingSpinner.classList.remove("show");
+          if (formEl) formEl.style.display = "none";
+          if (successMessage) successMessage.classList.add("show");
+          window.scrollTo(0, 0);
+        } catch (err) {
+          console.error("Submit error:", err);
+          if (loadingSpinner) loadingSpinner.classList.remove("show");
+          showError(
+            "Submission failed. " +
+              (err && err.message ? err.message : "Please try again or contact QA.")
+          );
+        }
+      });
     } else {
-        console.error('qaForm element not found!');
+      console.error("qaForm element not found!");
     }
 
-    // ========= INIT =========
-    document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.querySelector('input[name="visit_date"]');
-        if (dateInput && !dateInput.value) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
-        }
+    // === Init ===
+    const dateInput = document.querySelector('input[name="visit_date"]');
+    if (dateInput && !dateInput.value) {
+      const today = new Date().toISOString().split("T")[0];
+      dateInput.value = today;
+    }
 
-        // keep plant mirror in sync
-        const plantSelect = document.getElementById('plantSelect');
-        const plantHidden = document.getElementById('plantHidden');
-        if (plantSelect && plantHidden) {
-            plantSelect.addEventListener('change', () => {
-                plantHidden.value = plantSelect.value || '';
-            });
-        }
+    const plantSelect = document.getElementById("plantSelect");
+    const plantHidden = document.getElementById("plantHidden");
+    if (plantSelect && plantHidden) {
+      plantSelect.addEventListener("change", () => {
+        plantHidden.value = plantSelect.value || "";
+      });
+    }
 
-        showPage(1);
-    });
+    showPage(1);
+  });
 </script>
 </body>
 </html>
