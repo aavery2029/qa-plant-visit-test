@@ -470,6 +470,7 @@
         }
     </style>
 </head>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
 <body>
 <div class="page-shell">
     <div class="card">
@@ -501,8 +502,16 @@
             <div class="error-message" id="errorMessage">
                 <p id="errorText"></p>
             </div>
+<input type="hidden" id="jsonPayload" name="json">
 
-            <form id="qaForm" novalidate>
+           <form
+  id="qaForm"
+  method="POST"
+  action="https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec"
+  target="hidden_iframe"
+  novalidate
+>
+
                 <!-- Fixed region for backend/report -->
                 <input type="hidden" name="region" value="Houston">
                 <!-- Also mirror for “plant” key as a backup -->
@@ -875,6 +884,8 @@
                 <div class="footer-note">
                     This form auto-generates the PDF & email using your entries above.
                 </div>
+<input type="hidden" id="jsonPayload" name="json">
+
             </form>
 
             <div class="success-message" id="successMessage">
@@ -1149,12 +1160,50 @@
 
             // CHANGED: remove no-cors and actually read JSON response
 
-        fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',             // <-- key: bypass CORS checks in browser
-    body: JSON.stringify(data)   // no custom headers; Apps Script still sees JSON string
-})
-    .then(() => {
+  formEl.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (!validatePage(currentPage)) return;
+
+    if (loadingSpinner) loadingSpinner.classList.add('show');
+
+    const formData = new FormData(formEl);
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    const plantSelect = document.getElementById('plantSelect');
+    const plantHidden = document.getElementById('plantHidden');
+    if (plantSelect && plantHidden) {
+        plantHidden.value = plantSelect.value || '';
+        data.plant = plantSelect.value || '';
+    }
+
+    data.timestamp = new Date().toISOString();
+
+    if (uploadedFiles.length > 0) {
+        data.images = uploadedFiles.map(f => ({
+            name: f.name,
+            data: f.data
+        }));
+    }
+
+    // PUT JSON INTO HIDDEN FIELD
+    const jsonInput = document.getElementById('jsonPayload');
+    jsonInput.value = JSON.stringify(data);
+
+    // SUBMIT FORM NORMALLY to Apps Script (no CORS)
+    formEl.submit();
+
+    // Show success screen immediately
+    if (loadingSpinner) loadingSpinner.classList.remove('show');
+    formEl.style.display = 'none';
+    const success = document.getElementById('successMessage');
+    if (success) success.classList.add('show');
+    window.scrollTo(0, 0);
+});
+  .then(() => {
         // We can't read the response in no-cors mode, but if we got here,
         // the browser successfully sent the request.
         if (loadingSpinner) loadingSpinner.classList.remove('show');
@@ -1194,5 +1243,7 @@
         showPage(1);
     });
 </script>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 </body>
 </html>
