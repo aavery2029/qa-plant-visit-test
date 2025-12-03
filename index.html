@@ -1,1191 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>QUIKRETE – QA Plant Visit Checklist</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QA Plant Visit Form</title>
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:0;
+  }
+  .container {
+    max-width: 760px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 28px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  }
+  h1 { margin-top:0; }
+  .hidden { display:none; }
+  .btn {
+    background:#1a3b5d;
+    color:#fff;
+    padding:10px 18px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+  }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .nav-btn {
+    margin-top:16px;
+    background:#888;
+  }
+  #submit-spinner {
+    margin-left:8px;
+    display:none;
+  }
+  #submit-status {
+    margin-top:14px;
+    font-size:14px;
+  }
+</style>
+
+<!-- CONFIG: YOUR GOOGLE SCRIPT URL -->
+<script>
+  const GOOGLE_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbxjh6BDjyjGqmk5ryfIfoWI2HXKOoaRJnKrXuF87gJM-65BN9nzkHrb9qluhCxfZmxcMg/exec";
+</script>
 
-    <style>
-        :root {
-            --brand-yellow: #facc15;
-            --brand-dark: #111827;
-            --brand-gray: #6b7280;
-            --border-subtle: #e5e7eb;
-            --bg-soft: #f3f4f6;
-            --accent-blue: #2563eb;
-            --danger: #dc2626;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 24px 12px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top, #fef9c3 0, #f3f4f6 40%, #e5e7eb 100%);
-            color: #111827;
-        }
-
-        .page-shell {
-            max-width: 980px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
-            overflow: hidden;
-            border: 1px solid rgba(15, 23, 42, 0.06);
-        }
-
-        .brand-header {
-            background: #000000;
-            padding: 0;
-        }
-
-        .brand-header-inner {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .brand-header-inner img {
-            width: 100%;
-            height: auto;
-            display: block;
-            max-height: 320px;
-            object-fit: cover;
-        }
-
-        .fallback-header {
-            padding: 22px 24px 20px;
-            background: linear-gradient(135deg, #111827, #020617);
-            color: #facc15;
-        }
-
-        .fallback-header h1 {
-            margin: 0;
-            font-size: 24px;
-            letter-spacing: 0.16em;
-        }
-
-        .fallback-header .subtitle {
-            margin-top: 6px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: #e5e7eb;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 7px;
-            background: #0b1120;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, #facc15, #a16207);
-            transition: width 0.25s ease-out;
-        }
-
-        .page-indicator {
-            padding: 10px 22px 8px;
-            font-size: 12px;
-            color: #9ca3af;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-            background: #020617;
-        }
-
-        .page-indicator span {
-            color: #e5e7eb;
-            font-weight: 500;
-        }
-
-        .form-content {
-            padding: 20px 20px 18px;
-            background: radial-gradient(circle at top left, #fefce8 0, #ffffff 46%, #f9fafb 100%);
-        }
-
-        @media (min-width: 640px) {
-            .form-content {
-                padding: 24px 28px 22px;
-            }
-        }
-
-        .section-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: #9ca3af;
-            margin-bottom: 4px;
-        }
-
-        .form-section {
-            border-radius: 14px;
-            border: 1px solid #e5e7eb;
-            padding: 16px 16px 14px;
-            background: rgba(255, 255, 255, 0.9);
-            margin-bottom: 14px;
-        }
-
-        @media (min-width: 640px) {
-            .form-section {
-                padding: 18px 20px 16px;
-                margin-bottom: 18px;
-            }
-        }
-
-        .form-section h3 {
-            margin: 0 0 8px;
-            font-size: 15px;
-            font-weight: 700;
-            color: #111827;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-section h3::before {
-            content: "";
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: #facc15;
-            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.35);
-        }
-
-        .section-caption {
-            margin: 0 0 10px;
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .form-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        @media (min-width: 640px) {
-            .form-row {
-                flex-direction: row;
-            }
-        }
-
-        .form-group {
-            flex: 1;
-            margin-bottom: 8px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 4px;
-        }
-
-        .required {
-            color: #dc2626;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="email"],
-        select,
-        textarea {
-            width: 100%;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            padding: 8px 9px;
-            font-size: 13px;
-            font-family: inherit;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-            background: #f9fafb;
-        }
-
-        input[type="text"]:focus,
-        input[type="date"]:focus,
-        input[type="email"]:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
-            background: #ffffff;
-        }
-
-        select {
-            cursor: pointer;
-        }
-
-        textarea {
-            min-height: 70px;
-            resize: vertical;
-        }
-
-        .note-text {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        .pill-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 4px;
-        }
-
-        .pill-option {
-            position: relative;
-        }
-
-        .pill-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .pill-option span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 999px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .pill-option input[type="radio"]:checked + span {
-            border-color: #2563eb;
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-
-        .pill-option input[type="radio"]:focus-visible + span {
-            outline: 2px solid #2563eb;
-        }
-
-        .file-upload {
-            margin-top: 8px;
-        }
-
-        .file-upload input[type="file"] {
-            font-size: 12px;
-        }
-
-        .file-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .image-preview {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .remove-btn {
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            width: 18px;
-            height: 18px;
-            border-radius: 999px;
-            border: none;
-            background: rgba(15, 23, 42, 0.85);
-            color: #f9fafb;
-            font-size: 11px;
-            cursor: pointer;
-        }
-
-        .button-row {
-            margin-top: 8px;
-            padding-top: 10px;
-            border-top: 1px dashed #e5e7eb;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .btn {
-            border-radius: 999px;
-            border: 1px solid transparent;
-            padding: 7px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #facc15, #eab308);
-            color: #111827;
-            border-color: #eab308;
-            box-shadow: 0 8px 18px rgba(250, 204, 21, 0.45);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-        }
-
-        .btn-secondary {
-            background: #ffffff;
-            color: #374151;
-            border-color: #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background: #f3f4f6;
-        }
-
-        .error-message {
-            display: none;
-            margin-bottom: 12px;
-            padding: 9px 10px;
-            border-radius: 10px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            font-size: 12px;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .error-message p {
-            margin: 0;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .invalid {
-            border-color: #dc2626 !important;
-        }
-
-        .footer-note {
-            margin-top: 8px;
-            font-size: 11px;
-            color: #9ca3af;
-            text-align: right;
-        }
-
-        .success-message {
-            display: none;
-            padding: 26px 24px;
-            text-align: center;
-            background: #f0fdf4;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        .success-message h2 {
-            margin: 0 0 8px;
-            font-size: 18px;
-            color: #166534;
-        }
-
-        .success-message p {
-            margin: 0;
-            font-size: 13px;
-            color: #14532d;
-        }
-
-        .loading-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.35);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        .loading-backdrop.show {
-            display: flex;
-        }
-
-        .loading-box {
-            background: #0b1120;
-            color: #e5e7eb;
-            padding: 14px 18px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
-            font-size: 13px;
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border-radius: 999px;
-            border: 2px solid rgba(148, 163, 184, 0.5);
-            border-top-color: #facc15;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
 </head>
 <body>
-<div class="page-shell">
-    <div class="card">
-        <!-- HEADER -->
-        <div class="brand-header">
-            <div class="brand-header-inner">
-                <img src="https://raw.githubusercontent.com/aavery2029/qa-plant-visit-test/main/qa-header.png"
-                     alt="Quikrete QA Plant Visit Checklist"
-                     onerror="document.getElementById('fallbackHeader').style.display='block'; this.style.display='none';">
 
-                <div id="fallbackHeader" class="fallback-header" style="display:none;">
-                    <h1>QUIKRETE</h1>
-                    <div class="subtitle">QA PLANT VISIT CHECKLIST</div>
-                </div>
-            </div>
-        </div>
+<div class="container">
 
-        <!-- PROGRESS -->
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="page-indicator">
-            <div>Page <span id="currentPage">1</span> of <span id="totalPages">2</span></div>
-            <div>Houston Region • QA Dept.</div>
-        </div>
+  <h1>QA Plant Visit Form</h1>
 
-        <!-- FORM CONTENT -->
-        <div class="form-content">
-            <div class="error-message" id="errorMessage">
-                <p id="errorText"></p>
-            </div>
+  <!-- Multi-page wrapper -->
+  <form id="qa-visit-form">
 
-            <form id="qaForm" novalidate>
-                <!-- Fixed region for backend/report -->
-                <input type="hidden" name="region" value="Houston">
-                <!-- Also mirror for “plant” key as a backup -->
-                <input type="hidden" name="plant" id="plantHidden">
+    <!-- PAGE 1 -->
+    <div id="page1">
 
-                <!-- PAGE 1 -->
-                <div class="page active" id="page1">
-                    <div class="section-label">Step 1</div>
-                    <div class="form-section">
-                        <h3>Basic Information</h3>
-                        <p class="section-caption">Core visit details for the QA log and report.</p>
+      <label>Plant Name</label><br>
+      <input type="text" name="Plant" required style="width:100%; padding:8px; margin-bottom:16px;"><br>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Date <span class="required">*</span></label>
-                                <input type="date" name="visit_date" required>
-                            </div>
+      <label>Inspector</label><br>
+      <input type="text" name="Inspector" required style="width:100%; padding:8px; margin-bottom:16px;"><br>
 
-                            <div class="form-group">
-                                <label>Plant / Location <span class="required">*</span></label>
-                                <select name="houston_location" id="plantSelect" required>
-                                    <option value="">-- Select Plant --</option>
-                                    <option value="PLANT 691- JERSEY VILLAGE (RM01)">PLANT 691- JERSEY VILLAGE (RM01)</option>
-                                    <option value="PLANT 692 - GREENSPOINT (RM02)">PLANT 692 - GREENSPOINT (RM02)</option>
-                                    <option value="PLANT 693 - FULTON  (RM03)">PLANT 693 - FULTON  (RM03)</option>
-                                    <option value="PLANT 694 - RENWICK (RM04)">PLANT 694 - RENWICK (RM04)</option>
-                                    <option value="PLANT 695 - BAYPORT (RM05)">PLANT 695 - BAYPORT (RM05)</option>
-                                    <option value="PLANT 696 - ELLINGTON (RM06)">PLANT 696 - ELLINGTON (RM06)</option>
-                                    <option value="PLANT 697 - CINCO (RM07)">PLANT 697 - CINCO (RM07)</option>
-                                    <option value="PLANT 698 - TUF-CRETE (RM08)">PLANT 698 - TUF-CRETE (RM08)</option>
-                                    <option value="PLANT 699 - BAYTOWN (RM09)">PLANT 699 - BAYTOWN (RM09)</option>
-                                    <option value="PLANT 700 - TOMBALL (RM10)">PLANT 700 - TOMBALL (RM10)</option>
-                                    <option value="PLANT 701 - HOLMES RD (RM11)">PLANT 701 - HOLMES RD (RM11)</option>
-                                    <option value="PLANT 702 - HOCKLEY (RM12)">PLANT 702 - HOCKLEY (RM12)</option>
-                                    <option value="PLANT 703 - CROSBY (RM13)">PLANT 703 - CROSBY (RM13)</option>
-                                    <option value="PLANT 704 - READING ROAD (RM14)">PLANT 704 - READING ROAD (RM14)</option>
-                                    <option value="PLANT 705 - MANVEL  (RM15)">PLANT 705 - MANVEL  (RM15)</option>
-                                    <option value="PLANT 706 - KATY EAST (RM16)">PLANT 706 - KATY EAST (RM16)</option>
-                                    <option value="PLANT 707 - BROOKSHIRE (RM17)">PLANT 707 - BROOKSHIRE (RM17)</option>
-                                    <option value="PLANT 708 - ANGLETON (HOU-RM18)">PLANT 708 - ANGLETON (HOU-RM18)</option>
-                                    <option value="PLANT 709 - MOORE BAR (RM19)">PLANT 709 - MOORE BAR (RM19)</option>
-                                    <option value="PLANT 710 - NEW CANEY (RM20)">PLANT 710 - NEW CANEY (RM20)</option>
-                                    <option value="PLANT 711 - KATY WEST (RM21)">PLANT 711 - KATY WEST (RM21)</option>
-                                    <option value="PLANT 780 - RICHMOND (RM24)">PLANT 780 - RICHMOND (RM24)</option>
-                                </select>
-                                <div class="note-text">Houston region plants only.</div>
-                            </div>
-                        </div>
+      <label>Date of Visit</label><br>
+      <input type="date" name="Visit Date" required style="padding:8px; margin-bottom:16px;"><br>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Observer Name <span class="required">*</span></label>
-                                <input type="text" name="qa_observer_name" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Plant Manager</label>
-                                <input type="text" name="plant_manager">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Operators Present</label>
-                            <input type="text" name="operators_present" placeholder="List operators on site during visit">
-                        </div>
-                    </div>
-
-                    <div class="section-label">Step 1</div>
-                    <div class="form-section">
-                        <h3>Safety & Operations</h3>
-                        <p class="section-caption">
-                            High-level checks that feed the Safety & Operations section of the report.
-                        </p>
-
-                        <div class="form-group">
-                            <label>Air checks documented?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="air_checks" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="air_checks" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="air_checks" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Drums reversed / washed out properly?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="drums_reversed" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="drums_reversed" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="drums_reversed" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Loads properly mixed before discharge?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="properly_mixed" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="properly_mixed" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="properly_mixed" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Excessive water added at the plant?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="excessive_water" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="excessive_water" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="excessive_water" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Overall safety / housekeeping environment?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="environment_safe" value="Acceptable">
-                                    <span>Acceptable</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="environment_safe" value="Needs Improvement">
-                                    <span>Needs Improvement</span>
-                                </label>
-                            </div>
-                            <div class="note-text">
-                                Short detail can be added in comments on the next page.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PAGE 2 -->
-                <div class="page" id="page2">
-                    <div class="section-label">Step 2</div>
-                    <div class="form-section">
-                        <h3>Aggregates</h3>
-                        <p class="section-caption">
-                            Observations that roll up into the Aggregates section of the report.
-                        </p>
-
-                        <div class="form-group">
-                            <label>Stockpiles managed appropriately?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="stockpiles_managed" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="stockpiles_managed" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="stockpiles_managed" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Aggregate bins emptied / maintained?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="bins_emptied" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="bins_emptied" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="bins_emptied" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-label">Step 2</div>
-                    <div class="form-section">
-                        <h3>Cement & Silo</h3>
-                        <p class="section-caption">
-                            Items that drive the Cement & Silo best-practices block in the PDF/email.
-                        </p>
-
-                        <div class="form-group">
-                            <label>Cement best practices followed?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="cement_best_practices" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="cement_best_practices" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="cement_best_practices" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Fill pipes locked / secure?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="fill_pipes_locked" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="fill_pipes_locked" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="fill_pipes_locked" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Minimum tests / calibrations performed?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="minimum_tests" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="minimum_tests" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="minimum_tests" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Scale locks / verification in place?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="scale_locks" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="scale_locks" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="scale_locks" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Testing tools & equipment available?</label>
-                            <div class="pill-group">
-                                <label class="pill-option">
-                                    <input type="radio" name="testing_tools" value="Yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="testing_tools" value="No">
-                                    <span>No</span>
-                                </label>
-                                <label class="pill-option">
-                                    <input type="radio" name="testing_tools" value="N/A">
-                                    <span>N/A</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-label">Step 2</div>
-                    <div class="form-section">
-                        <h3>Comments & Photos</h3>
-                        <p class="section-caption">
-                            These fields appear in the professional “Comments & Notes” block plus inline photos
-                            in the PDF/email.
-                        </p>
-
-                        <div class="form-group">
-                            <label>Daily Operations Comments</label>
-                            <textarea name="daily_ops_comments"
-                                      placeholder="Concrete batching, QC tests, truck flow, etc."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Aggregate Comments</label>
-                            <textarea name="aggregate_comments"
-                                      placeholder="Stockpile condition, contamination, moisture control, etc."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Cement / Silo Comments</label>
-                            <textarea name="cement_comments"
-                                      placeholder="Silo levels, aeration, plugging, cement handling."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Final Notes</label>
-                            <textarea name="final_notes"
-                                      placeholder="Key risks, wins, follow up actions, and commitments."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Photos (up to 5)</label>
-                            <div class="file-upload">
-                                <input type="file" id="photoUpload" accept="image/*" multiple>
-                                <div class="note-text">
-                                    Images are compressed before sending and attached to the PDF/email.
-                                </div>
-                            </div>
-                            <div class="file-list" id="fileList"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Email for Copy (optional)</label>
-                            <input type="email" name="email" placeholder="Enter email to receive a copy of this report">
-                            <div class="note-text">
-                                A copy of the report will be emailed here. QA Admin is always BCC’d automatically.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="button-row">
-                    <button type="button" class="btn btn-secondary" id="prevBtn">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextBtn">Next Page</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn" style="display:none;">
-                        Submit Report
-                    </button>
-                </div>
-
-                <div class="footer-note">
-                    This form auto-generates the PDF & email using your entries above.
-                </div>
-            </form>
-
-            <div class="success-message" id="successMessage">
-                <h2>Report Submitted</h2>
-                <p>Your QA Plant Visit report has been sent and logged successfully.</p>
-            </div>
-        </div>
+      <button type="button" id="nextBtn" class="btn nav-btn">Next Page →</button>
     </div>
+
+
+    <!-- PAGE 2 -->
+    <div id="page2" class="hidden">
+
+      <label>Overall Findings</label><br>
+      <textarea name="Overall Findings" rows="4" style="width:100%;padding:8px;margin-bottom:16px;"></textarea><br>
+
+      <label>Corrective Actions Needed</label><br>
+      <textarea name="Corrective Actions" rows="4" style="width:100%;padding:8px;margin-bottom:16px;"></textarea><br>
+
+      <button type="button" id="backBtn" class="btn nav-btn">← Back</button>
+      <button type="submit" class="btn" style="float:right;">Submit Report</button>
+      <span id="submit-spinner">⏳</span>
+
+      <div style="clear:both;"></div>
+    </div>
+
+  </form>
+
+  <div id="submit-status"></div>
 </div>
 
-<!-- LOADING OVERLAY -->
-<div class="loading-backdrop" id="loadingSpinner">
-    <div class="loading-box">
-        <div class="spinner"></div>
-        <div>Submitting QA Plant Visit report…</div>
-    </div>
-</div>
 
+<!-- SUBMIT + PAGE NAV LOGIC -->
 <script>
-    // ========= CONFIG =========
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYourIdHere/exec";
+document.addEventListener("DOMContentLoaded", () => {
 
-    // ========= PAGE NAV =========
-    let currentPage = 1;
-    const totalPages = 2;
+  // Page switching
+  const page1 = document.getElementById("page1");
+  const page2 = document.getElementById("page2");
+  document.getElementById("nextBtn").onclick = () => {
+    page1.classList.add("hidden");
+    page2.classList.remove("hidden");
+  };
+  document.getElementById("backBtn").onclick = () => {
+    page2.classList.add("hidden");
+    page1.classList.remove("hidden");
+  };
 
-    const pages = document.querySelectorAll('.page');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressFill = document.getElementById('progressFill');
-    const currentPageSpan = document.getElementById('currentPage');
-    const totalPagesSpan = document.getElementById('totalPages');
-    const loadingSpinner = document.getElementById('loadingSpinner');
+  const form = document.getElementById("qa-visit-form");
+  const statusEl = document.getElementById("submit-status");
+  const spinnerEl = document.getElementById("submit-spinner");
 
-    if (totalPagesSpan) {
-        totalPagesSpan.textContent = totalPages;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // UI lock
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    spinnerEl.style.display = "inline-block";
+    statusEl.textContent = "Submitting QA Plant Visit report…";
+    statusEl.style.color = "#444";
+
+    try {
+      // Collect form contents
+      const fd = new FormData(form);
+      const payload = {};
+      for (const [key, value] of fd.entries()) {
+        payload[key] = value;
+      }
+
+      // Send to Apps Script
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let data = null;
+      try { data = await res.json(); } catch(_) {}
+
+      if (!res.ok || !data || data.status !== "success") {
+        statusEl.style.color = "#b00020";
+        statusEl.textContent = "Error submitting report. Please try again.";
+        return;
+      }
+
+      // SUCCESS
+      statusEl.style.color = "#0a7c2f";
+      statusEl.textContent = "Report submitted successfully! Email + PDF sent.";
+      form.reset();
+
+      // Optional: send them back to Page 1
+      page2.classList.add("hidden");
+      page1.classList.remove("hidden");
+
+    } catch (err) {
+      console.error(err);
+      statusEl.style.color = "#b00020";
+      statusEl.textContent = "Network error. Check connection or deployment.";
+    } finally {
+      spinnerEl.style.display = "none";
+      submitBtn.disabled = false;
     }
-
-    function showPage(pageNum) {
-        pages.forEach((page, index) => {
-            page.classList.toggle('active', index === pageNum - 1);
-        });
-
-        currentPage = pageNum;
-        if (currentPageSpan) currentPageSpan.textContent = pageNum;
-
-        if (progressFill) {
-            const progress = (pageNum / totalPages) * 100;
-            progressFill.style.width = progress + '%';
-        }
-
-        if (prevBtn) prevBtn.style.display = pageNum === 1 ? 'none' : 'inline-flex';
-        if (nextBtn) nextBtn.style.display = pageNum === totalPages ? 'none' : 'inline-flex';
-        if (submitBtn) submitBtn.style.display = pageNum === totalPages ? 'inline-flex' : 'none';
-    }
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (validatePage(currentPage)) {
-                showPage(currentPage + 1);
-                window.scrollTo(0, 0);
-            }
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            showPage(currentPage - 1);
-            window.scrollTo(0, 0);
-        });
-    }
-
-    // ========= FILE UPLOAD / IMAGE HANDLING =========
-    const photoUpload = document.getElementById('photoUpload');
-    const fileList = document.getElementById('fileList');
-    let uploadedFiles = [];
-
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.onload = function () {
-                    let width = img.width;
-                    let height = img.height;
-                    const MAX = 1920;
-
-                    if (width > MAX || height > MAX) {
-                        if (width > height) {
-                            height = (height / width) * MAX;
-                            width = MAX;
-                        } else {
-                            width = (width / height) * MAX;
-                            height = MAX;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    try {
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        resolve(dataUrl);
-                    } catch (err) {
-                        reject(err);
-                    }
-                };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function displayFiles() {
-        if (!fileList) return;
-        fileList.innerHTML = '';
-        uploadedFiles.forEach((file, index) => {
-            const preview = document.createElement('div');
-            preview.className = 'image-preview';
-
-            const img = document.createElement('img');
-            img.src = file.data;
-            img.alt = file.name;
-            preview.appendChild(img);
-
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'remove-btn';
-            btn.textContent = 'x';
-            btn.addEventListener('click', () => {
-                removeFile(index);
-            });
-            preview.appendChild(btn);
-
-            fileList.appendChild(preview);
-        });
-    }
-
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        displayFiles();
-    }
-
-    if (photoUpload && fileList) {
-        photoUpload.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files || []);
-
-            if (uploadedFiles.length + files.length > 5) {
-                showError('Maximum 5 files allowed.');
-                photoUpload.value = '';
-                return;
-            }
-
-            for (let file of files) {
-                if (!file.type || !file.type.startsWith('image/')) {
-                    showError('Please upload only image files.');
-                    continue;
-                }
-
-                if (file.size > 10 * 1024 * 1024) {
-                    showError('File ' + file.name + ' is too large (max 10MB).');
-                    continue;
-                }
-
-                try {
-                    const compressedImage = await compressImage(file);
-                    uploadedFiles.push({name: file.name, data: compressedImage});
-                } catch (err) {
-                    console.error('Error processing image:', err);
-                    showError('Failed to process ' + file.name);
-                }
-            }
-
-            displayFiles();
-            photoUpload.value = '';
-        });
-    }
-
-    // ========= VALIDATION =========
-    function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        if (!errorDiv || !errorText) return;
-        errorText.textContent = message;
-        errorDiv.classList.add('show');
-        setTimeout(() => {
-            errorDiv.classList.remove('show');
-        }, 5000);
-    }
-
-    function validatePage(pageNum) {
-        const currentPageDiv = document.getElementById('page' + pageNum);
-        if (!currentPageDiv) return true;
-
-        const requiredFields = currentPageDiv.querySelectorAll('[required]');
-        let isValid = true;
-        let firstInvalidField = null;
-
-        requiredFields.forEach(field => {
-            const formGroup = field.closest ? field.closest('.form-group') : null;
-            if (formGroup && formGroup.style.display === 'none') {
-                return;
-            }
-
-            if (field.type === 'radio') {
-                const radios = currentPageDiv.querySelectorAll('[name="' + field.name + '"]');
-                const checked = Array.from(radios).some(r => r.checked);
-                if (!checked) {
-                    isValid = false;
-                    if (!firstInvalidField) firstInvalidField = field;
-                }
-            } else {
-                if (!field.value || field.value.trim() === '') {
-                    isValid = false;
-                    field.classList.add('invalid');
-                    if (!firstInvalidField) firstInvalidField = field;
-                } else {
-                    field.classList.remove('invalid');
-                }
-            }
-        });
-
-        if (!isValid) {
-            showError('Please fill in all required fields on this page.');
-            if (firstInvalidField && firstInvalidField.scrollIntoView) {
-                firstInvalidField.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
-        }
-
-        return isValid;
-    }
-
-    // ========= SUBMIT TO SERVER =========
-    const formEl = document.getElementById('qaForm');
-
-    if (formEl) {
-        formEl.setAttribute('novalidate', 'novalidate');
-
-        formEl.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!validatePage(currentPage)) return;
-
-            if (loadingSpinner) loadingSpinner.classList.add('show');
-
-            const formData = new FormData(formEl);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-
-            // ensure plant mirror for backend
-            const plantSelect = document.getElementById('plantSelect');
-            const plantHidden = document.getElementById('plantHidden');
-            if (plantSelect && plantHidden) {
-                plantHidden.value = plantSelect.value || '';
-            }
-
-            data.timestamp = new Date().toISOString();
-            if (uploadedFiles.length > 0) {
-                data.images = uploadedFiles.map(f => ({
-                    name: f.name,
-                    data: f.data
-                }));
-            }
-
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            }).then(() => {
-                if (loadingSpinner) loadingSpinner.classList.remove('show');
-                formEl.style.display = 'none';
-                const success = document.getElementById('successMessage');
-                if (success) success.classList.add('show');
-                window.scrollTo(0, 0);
-            }).catch(err => {
-                console.error('Submit error:', err);
-                if (loadingSpinner) loadingSpinner.classList.remove('show');
-                showError('Submission failed. Please try again.');
-            });
-        });
-    } else {
-        console.error('qaForm element not found!');
-    }
-
-    // ========= INIT =========
-    document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.querySelector('input[name="visit_date"]');
-        if (dateInput && !dateInput.value) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
-        }
-
-        // keep plant mirror in sync
-        const plantSelect = document.getElementById('plantSelect');
-        const plantHidden = document.getElementById('plantHidden');
-        if (plantSelect && plantHidden) {
-            plantSelect.addEventListener('change', () => {
-                plantHidden.value = plantSelect.value || '';
-            });
-        }
-
-        showPage(1);
-    });
+  });
+});
 </script>
+
 </body>
 </html>
