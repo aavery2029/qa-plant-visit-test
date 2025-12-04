@@ -1141,37 +1141,44 @@
           }));
         }
 
-        try {
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
+       try {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
-          let payload = null;
-          try {
-            payload = await res.json();
-          } catch (err) {
-            console.warn("Could not parse JSON response", err);
-          }
+  let payload = null;
+  try {
+    payload = await res.json();
+  } catch (err) {
+    console.warn("Could not parse JSON response", err);
+  }
 
-          if (!res.ok || !payload || payload.status !== "success") {
-            const msg = payload && payload.message ? payload.message : "Submission failed.";
-            throw new Error(msg);
-          }
+  // Log whatever the server sent, for debugging
+  console.log("Submit response:", res.status, payload);
 
-          if (loadingSpinner) loadingSpinner.classList.remove("show");
-          if (formEl) formEl.style.display = "none";
-          if (successMessage) successMessage.classList.add("show");
-          window.scrollTo(0, 0);
-        } catch (err) {
-          console.error("Submit error:", err);
-          if (loadingSpinner) loadingSpinner.classList.remove("show");
-          showError(
-            "Submission failed. " +
-              (err && err.message ? err.message : "Please try again or contact QA.")
-          );
-        }
+  // Treat ANY 2xx as success, unless payload explicitly says status: "error"
+  if (!res.ok || (payload && payload.status === "error")) {
+    const msg =
+      payload && payload.message
+        ? payload.message
+        : "Submission failed on server.";
+    throw new Error(msg);
+  }
+
+  if (loadingSpinner) loadingSpinner.classList.remove("show");
+  if (formEl) formEl.style.display = "none";
+  if (successMessage) successMessage.classList.add("show");
+  window.scrollTo(0, 0);
+} catch (err) {
+  console.error("Submit error:", err);
+  if (loadingSpinner) loadingSpinner.classList.remove("show");
+  showError(
+    "Submission failed. " +
+      (err && err.message ? err.message : "Please try again or contact QA.")
+  );
+}
       });
     } else {
       console.error("qaForm element not found!");
