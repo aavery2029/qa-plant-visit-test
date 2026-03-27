@@ -844,7 +844,7 @@
         </div>
 
         <div class="form-group">
-            <label>Photos (up to 5)</label>
+            <label>Photos (up to 10)</label>
             <div class="file-upload">
                 <input type="file" id="photoUpload" accept="image/*" multiple>
                 <div class="note-text">
@@ -1099,8 +1099,8 @@
       photoUpload.addEventListener("change", async (e) => {
         const files = Array.from(e.target.files || []);
 
-        if (uploadedFiles.length + files.length > 5) {
-          showError("Maximum 5 files allowed.");
+        if (uploadedFiles.length + files.length > 10) {
+          showError("Maximum 10 files allowed.");
           photoUpload.value = "";
           return;
         }
