@@ -852,6 +852,7 @@
                 </div>
             </div>
             <div class="file-list" id="fileList"></div>
+            <div id="photoSizeInfo" style="font-size:12px;color:#64748b;margin-top:5px;display:none;"></div>
         </div>
 
         <div class="form-group">
@@ -889,7 +890,8 @@
 <div class="loading-backdrop" id="loadingSpinner">
     <div class="loading-box">
         <div class="spinner"></div>
-        <div>Submitting QA Plant Visit report…</div>
+        <div id="loadingMessage">Submitting QA Plant Visit report…</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">Please wait — this may take a moment with photos attached.</div>
     </div>
 </div>
 
@@ -998,14 +1000,15 @@
           img.onload = function () {
             let width = img.width;
             let height = img.height;
-            const MAX = 1920;
 
+            // Step 1: Scale down to max 1024px
+            const MAX = 1024;
             if (width > MAX || height > MAX) {
               if (width > height) {
-                height = (height / width) * MAX;
+                height = Math.round((height / width) * MAX);
                 width = MAX;
               } else {
-                width = (width / height) * MAX;
+                width = Math.round((width / height) * MAX);
                 height = MAX;
               }
             }
@@ -1015,8 +1018,30 @@
             canvas.height = height;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
+
             try {
-              const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+              // Step 2: Start at 0.5 quality, reduce until under 150KB
+              let quality = 0.5;
+              let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+              while (dataUrl.length > 150000 && quality > 0.1) {
+                quality -= 0.05;
+                dataUrl = canvas.toDataURL("image/jpeg", quality);
+              }
+
+              // Step 3: If still too big, shrink dimensions further
+              if (dataUrl.length > 150000) {
+                let scale = 0.75;
+                while (dataUrl.length > 150000 && scale > 0.3) {
+                  canvas.width = Math.round(width * scale);
+                  canvas.height = Math.round(height * scale);
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                  dataUrl = canvas.toDataURL("image/jpeg", 0.15);
+                  scale -= 0.1;
+                }
+              }
+
+              console.log("Compressed " + file.name + ": " + (dataUrl.length / 1024).toFixed(0) + "KB @ q" + quality.toFixed(2));
               resolve(dataUrl);
             } catch (err) {
               reject(err);
@@ -1054,6 +1079,20 @@
 
         fileList.appendChild(preview);
       });
+
+      // Show total compressed size
+      const sizeInfo = document.getElementById("photoSizeInfo");
+      if (sizeInfo) {
+        if (uploadedFiles.length > 0) {
+          const totalBytes = uploadedFiles.reduce((sum, f) => sum + f.data.length, 0);
+          const totalKB = (totalBytes / 1024).toFixed(0);
+          const color = totalBytes > 3000000 ? "#e74c3c" : totalBytes > 1500000 ? "#f39c12" : "#27ae60";
+          sizeInfo.innerHTML = uploadedFiles.length + " photo(s) — <span style='color:" + color + ";font-weight:bold;'>" + totalKB + " KB compressed</span>";
+          sizeInfo.style.display = "block";
+        } else {
+          sizeInfo.style.display = "none";
+        }
+      }
     }
 
     if (photoUpload && fileList) {
@@ -1069,11 +1108,6 @@
         for (let file of files) {
           if (!file.type || !file.type.startsWith("image/")) {
             showError("Please upload only image files.");
-            continue;
-          }
-
-          if (file.size > 10 * 1024 * 1024) {
-            showError("File " + file.name + " is too large (max 10MB).");
             continue;
           }
 
@@ -1118,6 +1152,7 @@
         if (!validatePage(currentPage)) return;
 
         if (loadingSpinner) loadingSpinner.classList.add("show");
+        const loadingMsg = document.getElementById("loadingMessage");
 
         const formData = new FormData(formEl);
         const data = {};
@@ -1135,18 +1170,31 @@
 
         data.timestamp = new Date().toISOString();
         if (uploadedFiles.length > 0) {
+          if (loadingMsg) loadingMsg.textContent = "Uploading " + uploadedFiles.length + " photo(s)…";
           data.images = uploadedFiles.map((f) => ({
             name: f.name,
             data: f.data,
           }));
         }
 
+        // Check payload size before sending
+        const jsonBody = JSON.stringify(data);
+        const payloadSizeMB = (jsonBody.length / (1024 * 1024)).toFixed(1);
+        console.log("Payload size: " + payloadSizeMB + " MB");
+
        try {
+  // 3-minute timeout (large photos need time)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 180000);
+
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: jsonBody,
+    signal: controller.signal,
   });
+
+  clearTimeout(timeoutId);
 
   let payload = null;
   try {
@@ -1174,10 +1222,14 @@
 } catch (err) {
   console.error("Submit error:", err);
   if (loadingSpinner) loadingSpinner.classList.remove("show");
-  showError(
-    "Submission failed. " +
-      (err && err.message ? err.message : "Please try again or contact QA.")
-  );
+  if (err.name === "AbortError") {
+    showError("Submission timed out. Try removing some photos or using smaller photos, then resubmit.");
+  } else {
+    showError(
+      "Submission failed. " +
+        (err && err.message ? err.message : "Please try again or contact QA.")
+    );
+  }
 }
       });
     } else {
