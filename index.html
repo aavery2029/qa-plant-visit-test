@@ -141,6 +141,31 @@
             transition: width 0.25s ease-out;
         }
 
+        /* Desktop: taller bar, title raised well clear of the bottom edge */
+        @media (min-width: 640px) {
+            .slim-bar {
+                height: 64px;
+                padding: 0 20px 6px;
+            }
+
+            .slim-bar img {
+                height: 46px;
+                width: 92px;
+            }
+
+            .slim-bar .slim-title {
+                font-size: 18px;
+                line-height: 1.15;
+                align-self: center;
+                transform: translateY(-2px);
+            }
+
+            .slim-bar .slim-title small {
+                font-size: 11px;
+                margin-bottom: 1px;
+            }
+        }
+
         .fallback-header {
             padding: 22px 24px 20px;
             background: linear-gradient(135deg, #111827, #020617);
@@ -795,6 +820,7 @@
 
     <div class="form-group">
         <label>Truck washdown observed?</label>
+        <div class="note-text">Washdown happens after the truck is loaded: the driver washes down and tempers the load before heading to the job. Standard is 10 minutes.</div>
         <div class="pill-group">
             <label class="pill-option">
                 <input type="radio" name="washdown_observed" value="Yes" required>
@@ -810,10 +836,10 @@
             </label>
         </div>
         <div class="conditional-field" id="washdownTimeField">
-            <label>Washdown time observed</label>
+            <label>Washdown / temper time (standard: 10 min)</label>
             <input type="text" name="washdown_time" inputmode="numeric"
-                   placeholder="e.g. 2 min 30 sec — or notes on what you saw">
-            <div class="note-text">How long the washdown took, plus anything notable (excess water into drum, skipped fins, etc.).</div>
+                   placeholder="e.g. 10 min — or notes on what you saw">
+            <div class="note-text">Time from end of loading until the truck left for the job (washdown + tempering the load). Standard is 10 minutes — note anything off (well under/over 10 min, excess water into drum, skipped fins, etc.).</div>
         </div>
     </div>
 
