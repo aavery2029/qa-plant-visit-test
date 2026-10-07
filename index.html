@@ -2331,6 +2331,7 @@
     // === Photos: one strip per section ===
     let photos = []; // { id, section, name, caption, data }
     let photoSeq = 0;
+    let photoJobs = 0; // add batches still compressing (Submit waits for these)
     const sectionOrder = Array.from(document.querySelectorAll(".form-section[data-section]"))
       .map((s) => s.dataset.section);
 
@@ -2483,51 +2484,75 @@
       input.addEventListener("change", async (e) => {
         const files = Array.from(e.target.files || []);
         input.value = "";
+        if (!files.length) return;
         photoMessage(panel, "");
         if (addText) addText.textContent = "Adding…";
+        // One batch at a time per section, so the 4 photo limit can't be
+        // raced by a second pick while the first is still compressing
+        input.disabled = true;
+        photoJobs++;
 
-        for (const file of files) {
-          const inSection = photos.filter((p) => p.section === sectionId).length;
-          if (inSection >= PHOTOS_PER_SECTION) {
-            photoMessage(panel, "This section holds " + PHOTOS_PER_SECTION + " photos. Remove one to add another.");
-            break;
-          }
-          if (photos.length >= PHOTOS_PER_REPORT) {
-            photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
-            break;
-          }
-          if (!file.type || !file.type.startsWith("image/")) {
-            photoMessage(panel, "Only image files can be added.");
-            continue;
-          }
-
-          try {
-            const data = await compressImage(file);
-            if (photoChars() + data.length > PHOTO_BUDGET_CHARS) {
-              photoMessage(panel, "This report has reached its photo size limit. Remove a photo to add another.");
+        try {
+          for (const file of files) {
+            const inSection = photos.filter((p) => p.section === sectionId).length;
+            if (inSection >= PHOTOS_PER_SECTION) {
+              photoMessage(panel, "This section holds " + PHOTOS_PER_SECTION + " photos. Remove one to add another.");
               break;
             }
-            photos.push({ id: newPhotoId(), section: sectionId, name: file.name || "photo.jpg", caption: "", data: data });
-          } catch (err) {
-            console.error("Error processing image:", err);
-            photoMessage(panel, "Could not read " + (file.name || "that photo") + ".");
-          }
-        }
+            if (photos.length >= PHOTOS_PER_REPORT) {
+              photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
+              break;
+            }
+            if (!file.type || !file.type.startsWith("image/")) {
+              photoMessage(panel, "Only image files can be added.");
+              continue;
+            }
 
-        if (addText) addText.textContent = "Add photo";
-        renderPhotos(sectionId);
-        savePhotos();
+            try {
+              const data = await compressImage(file);
+              if (photoChars() + data.length > PHOTO_BUDGET_CHARS) {
+                photoMessage(panel, "This report has reached its photo size limit. Remove a photo to add another.");
+                break;
+              }
+              photos.push({ id: newPhotoId(), section: sectionId, name: file.name || "photo.jpg", caption: "", data: data });
+            } catch (err) {
+              console.error("Error processing image:", err);
+              photoMessage(panel, "Could not read " + (file.name || "that photo") + ".");
+            }
+          }
+        } finally {
+          photoJobs--;
+          input.disabled = false;
+          if (addText) addText.textContent = "Add photo";
+          renderPhotos(sectionId);
+          savePhotos();
+        }
       });
     });
+
+    function waitForPhotos(maxMs) {
+      return new Promise((resolve) => {
+        const start = Date.now();
+        (function tick() {
+          if (photoJobs === 0) return resolve(true);
+          if (Date.now() - start > maxMs) return resolve(false);
+          setTimeout(tick, 200);
+        })();
+      });
+    }
 
     // === Draft autosave / resume ===
     // Answers live in localStorage; photos live in IndexedDB (too big for
     // localStorage once every section can hold pictures). A refresh, crash,
     // or dead battery no longer loses a walk.
-    const DRAFT_KEY = "qa_visit_draft_v2";
-    const DRAFT_KEY_V1 = "qa_visit_draft_v1"; // single photo box drafts from before Oct 2026
-    const PHOTO_DB = "qa_visit_draft_photos";
+    // The /preview/ copy shares this site's storage with the live form, so it
+    // keeps its own keys: a real walk in progress never opens in test mode.
+    const STORE_SUFFIX = TEST_MODE ? "_preview" : "";
+    const DRAFT_KEY = "qa_visit_draft_v2" + STORE_SUFFIX;
+    const DRAFT_KEY_V1 = TEST_MODE ? null : "qa_visit_draft_v1"; // single photo box drafts from before Oct 2026
+    const PHOTO_DB = "qa_visit_draft_photos" + STORE_SUFFIX;
     let draftRestoring = false;
+    let submitted = false; // after a successful send nothing may re-save the draft
 
     function idbOpen() {
       return new Promise((resolve, reject) => {
@@ -2555,6 +2580,15 @@
     const idbPut = (key, value) => idbRun("readwrite", (store) => store.put(value, key));
     const idbDel = (key) => idbRun("readwrite", (store) => store.delete(key));
 
+    // Some phones never answer an IndexedDB open; don't let that stall the page
+    function withTimeout(promise, ms) {
+      return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+    }
+
+    function photoSnapshot() {
+      return photos.map((p) => Object.assign({}, p));
+    }
+
     function collectDraft() {
       const d = { fields: {}, savedAt: new Date().toISOString() };
       formEl.querySelectorAll("input[name], select[name], textarea[name]").forEach((el) => {
@@ -2567,62 +2601,95 @@
       return d;
     }
 
+    // Only real edits mark the draft dirty, so closing an untouched page
+    // never leaves a blank "in-progress report" behind
+    let draftDirty = false;
     function writeDraft() {
+      if (submitted) return;
+      draftDirty = false;
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(collectDraft()));
       } catch (e) { /* storage unavailable: form still works normally */ }
     }
 
+    let photosDirty = false;
+    function writePhotos() {
+      if (submitted) return Promise.resolve();
+      photosDirty = false;
+      return idbPut("photos", photoSnapshot()).catch(() => {});
+    }
+
     let draftTimer = null;
     function saveDraft() {
-      if (draftRestoring) return;
+      if (draftRestoring || submitted) return;
+      draftDirty = true;
       clearTimeout(draftTimer);
       draftTimer = setTimeout(writeDraft, 400);
     }
 
     let photoTimer = null;
     function savePhotos() {
-      if (draftRestoring) return;
+      if (draftRestoring || submitted) return;
+      photosDirty = true;
       clearTimeout(photoTimer);
       photoTimer = setTimeout(() => {
-        idbPut("photos", photos.map((p) => Object.assign({}, p))).catch(() => {});
+        writePhotos();
         writeDraft(); // keeps the restore banner's "saved at" time current
       }, 400);
     }
+
+    // Write anything still waiting on the debounce right now: before a send,
+    // and when the phone backgrounds the page (camera open, app switch, lock)
+    function flushDraft() {
+      if (draftRestoring || submitted) return;
+      if (draftDirty) {
+        clearTimeout(draftTimer);
+        writeDraft();
+      }
+      if (photosDirty) {
+        clearTimeout(photoTimer);
+        writePhotos();
+      }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushDraft();
+    });
+    window.addEventListener("pagehide", flushDraft);
 
     function clearDraft() {
       // Cancel pending debounced saves: otherwise an answer clicked just
       // before Submit re-writes the draft AFTER this clear
       clearTimeout(draftTimer);
       clearTimeout(photoTimer);
+      draftDirty = false;
+      photosDirty = false;
       try {
         localStorage.removeItem(DRAFT_KEY);
-        localStorage.removeItem(DRAFT_KEY_V1);
+        if (DRAFT_KEY_V1) localStorage.removeItem(DRAFT_KEY_V1);
       } catch (e) {}
       const banner = document.getElementById("draftBanner");
       if (banner) banner.style.display = "none";
       return idbDel("photos").catch(() => {});
     }
 
-    async function restoreDraft() {
+    function readDraft() {
       let d = null;
       let fromV1 = false;
       try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (e) {}
-      if (!d || !d.fields) {
+      if ((!d || !d.fields) && DRAFT_KEY_V1) {
         try {
           d = JSON.parse(localStorage.getItem(DRAFT_KEY_V1) || "null");
           fromV1 = !!(d && d.fields);
         } catch (e) {}
       }
+      if (d && !d.fields) d = null;
+      return { d: d, fromV1: fromV1 };
+    }
 
-      let savedPhotos = null;
-      if (!fromV1) {
-        try { savedPhotos = await idbGet("photos"); } catch (e) {}
-      }
-
-      const hasFields = !!(d && d.fields && Object.keys(d.fields).length);
+    // Answers come back immediately (synchronous), before anything can be typed
+    function restoreFields(d) {
       draftRestoring = true;
-      if (hasFields) {
+      try {
         Object.entries(d.fields).forEach(([name, value]) => {
           const els = formEl.querySelectorAll('[name="' + name + '"]');
           els.forEach((el) => {
@@ -2633,47 +2700,69 @@
             }
           });
         });
+      } finally {
+        draftRestoring = false;
       }
+    }
 
-      let photoNote = "";
-      if (fromV1 && Array.isArray(d.photos) && d.photos.length) {
-        // Old drafts had one photo box at the end: spread those photos over
-        // the first sections in page order, PHOTOS_PER_SECTION each
-        d.photos.forEach((p, i) => {
-          const sec = sectionOrder[Math.floor(i / PHOTOS_PER_SECTION)];
-          if (sec && p && p.data) {
-            photos.push({ id: newPhotoId(), section: sec, name: p.name || "photo.jpg", caption: "", data: p.data });
-          }
-        });
-        photoNote = " Its photos were placed in the first sections.";
-      } else if (Array.isArray(savedPhotos) && savedPhotos.length) {
-        photos = savedPhotos.filter((p) => p && p.data && sectionOrder.indexOf(p.section) !== -1);
-      }
-      draftRestoring = false;
-      renderAllPhotos();
-
-      if (fromV1) {
-        // Carry the old draft forward in the new format, then retire it
-        writeDraft();
-        idbPut("photos", photos.map((p) => Object.assign({}, p))).catch(() => {});
-        try { localStorage.removeItem(DRAFT_KEY_V1); } catch (e) {}
-      }
-
-      if (!hasFields && !photos.length) return;
+    function showRestoreBanner(d, note) {
       const banner = document.getElementById("draftBanner");
       const bannerText = document.getElementById("draftBannerText");
-      if (banner && bannerText) {
-        let when = "";
-        try {
-          if (d && d.savedAt) {
-            const t = new Date(d.savedAt);
-            when = " from " + t.toLocaleDateString() + " " +
-                   t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      if (!banner || !bannerText) return;
+      let when = "";
+      try {
+        if (d && d.savedAt) {
+          const t = new Date(d.savedAt);
+          when = " from " + t.toLocaleDateString() + " " +
+                 t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        }
+      } catch (e) {}
+      bannerText.textContent = "Your in-progress report" + when + " was restored." + (note || "");
+      banner.style.display = "block";
+    }
+
+    // Photos come back from IndexedDB a moment later; anything added in the
+    // meantime is kept alongside them
+    async function restorePhotos(draft) {
+      let restored = [];
+      let note = "";
+      if (draft.fromV1) {
+        // Old drafts had one photo box at the end ({name, data} items):
+        // spread them over the first sections in page order
+        (Array.isArray(draft.d.photos) ? draft.d.photos : []).forEach((p, i) => {
+          const sec = sectionOrder[Math.floor(i / PHOTOS_PER_SECTION)];
+          if (sec && p && p.data) {
+            restored.push({ id: newPhotoId(), section: sec, name: p.name || "photo.jpg", caption: "", data: p.data });
           }
-        } catch (e) {}
-        bannerText.textContent = "Your in-progress report" + when + " was restored." + photoNote;
-        banner.style.display = "block";
+        });
+        if (restored.length) note = " Its photos were placed in the first sections.";
+      } else {
+        let saved = null;
+        try { saved = await withTimeout(idbGet("photos"), 4000); } catch (e) {}
+        if (Array.isArray(saved)) {
+          restored = saved.filter((p) => p && p.data && sectionOrder.indexOf(p.section) !== -1);
+        }
       }
+
+      if (restored.length) {
+        const ids = new Set(restored.map((p) => p.id));
+        photos = restored.concat(photos.filter((p) => !ids.has(p.id)));
+        renderAllPhotos();
+      }
+
+      if (draft.fromV1) {
+        // Carry the old draft forward in the new format; retire the old key
+        // only once its photos are safely stored in the new place
+        writeDraft();
+        const retire = () => { try { localStorage.removeItem(DRAFT_KEY_V1); } catch (e) {} };
+        if (restored.length) {
+          idbPut("photos", photoSnapshot()).then(retire).catch(() => {});
+        } else {
+          retire();
+        }
+      }
+
+      if (restored.length && !submitted) showRestoreBanner(draft.d, note);
     }
 
     // === Question cards ===
@@ -2832,13 +2921,42 @@
     if (formEl) {
       formEl.setAttribute("novalidate", "novalidate");
 
+      let submitting = false;
+
       formEl.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        // One send at a time: a second tap or Enter under the overlay would
+        // otherwise post the same report twice
+        if (submitting || submitted) return;
         if (!validatePage(currentPage)) return;
+
+        submitting = true;
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          await sendReport();
+        } finally {
+          submitting = false;
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+
+      async function sendReport() {
+        flushDraft(); // the error messages promise "saved on this phone"
 
         if (loadingSpinner) loadingSpinner.classList.add("show");
         const loadingMsg = document.getElementById("loadingMessage");
+
+        // A photo picked just before Submit may still be compressing
+        if (photoJobs > 0) {
+          if (loadingMsg) loadingMsg.textContent = "Finishing photos…";
+          if (!(await waitForPhotos(60000))) {
+            if (loadingSpinner) loadingSpinner.classList.remove("show");
+            showError("Photos are still being added. Give it a few seconds, then press Submit again.", true);
+            window.scrollTo(0, 0);
+            return;
+          }
+        }
 
         const formData = new FormData(formEl);
         const data = {};
@@ -2938,6 +3056,7 @@
 
         try {
           await attemptSubmit(1);
+          submitted = true;
           clearDraft();
           if (loadingSpinner) loadingSpinner.classList.remove("show");
           if (formEl) formEl.style.display = "none";
@@ -2957,7 +3076,7 @@
           }
           window.scrollTo(0, 0);
         }
-      });
+      }
     } else {
       console.error("qaForm element not found!");
     }
@@ -3009,23 +3128,27 @@
     // === Init ===
     showPage(1);
     renderAllPhotos();
-    restoreDraft()
-      .catch((e) => console.warn("Draft restore failed", e))
-      .then(() => {
-        syncWashdownField();
-        refreshAllAnswered();
 
-        const dateInput = document.querySelector('input[name="visit_date"]');
-        if (dateInput && !dateInput.value) {
-          // Local date, not UTC: toISOString() rolls to tomorrow after ~7 PM Central
-          const now = new Date();
-          const today = now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, "0") + "-" +
-            String(now.getDate()).padStart(2, "0");
-          dateInput.value = today;
-          refreshAnswered(dateInput.closest(".form-group"));
-        }
-      });
+    const draft = readDraft();
+    if (draft.d && Object.keys(draft.d.fields).length) {
+      restoreFields(draft.d);
+      showRestoreBanner(draft.d, "");
+    }
+    syncWashdownField();
+    refreshAllAnswered();
+
+    const dateInput = document.querySelector('input[name="visit_date"]');
+    if (dateInput && !dateInput.value) {
+      // Local date, not UTC: toISOString() rolls to tomorrow after ~7 PM Central
+      const now = new Date();
+      const today = now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
+      dateInput.value = today;
+      refreshAnswered(dateInput.closest(".form-group"));
+    }
+
+    restorePhotos(draft).catch((e) => console.warn("Photo restore failed", e));
   });
 </script>
 </body>
