@@ -66,8 +66,10 @@
             width: 100%;
             height: auto;
             display: block;
-            max-height: 320px;
+            max-height: 110px;
             object-fit: cover;
+            /* keep the "Quikrete QA Plant Visit Checklist" title band in view */
+            object-position: 50% 72%;
         }
 
         /* Fixed slim brand bar: slides in once the big header scrolls away.
@@ -821,6 +823,171 @@
         .photo-msg.show {
             display: block;
         }
+
+        @media (min-width: 640px) {
+            .brand-header-inner img {
+                max-height: 160px;
+            }
+        }
+
+        /* ===== Computers: compact layout (phones keep the big cards) ===== */
+        /* Answer targets stay glove sized on phones and touch tablets; with a
+           mouse, a section reads as one card with one line per question. */
+        @media (min-width: 900px) {
+            .form-section {
+                padding: 0 14px 12px;
+                margin-bottom: 14px;
+            }
+
+            .form-section h3 {
+                margin: 0 -14px 8px;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .section-caption {
+                margin: 0 0 8px;
+            }
+
+            .form-group {
+                padding: 8px 12px 10px;
+                margin-bottom: 8px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+                margin-bottom: 4px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            select,
+            textarea {
+                padding: 7px 10px;
+                font-size: 15px;
+            }
+
+            input[type="date"] {
+                min-height: 38px;
+            }
+
+            .q-list {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+
+            .q-list .q-card {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+                column-gap: 14px;
+                align-items: center;
+                margin: 0;
+                padding: 6px 12px 6px 10px;
+                border: 0;
+                border-left: 4px solid #cbd5e1;
+                border-bottom: 1px solid #eef0f3;
+                border-radius: 0;
+            }
+
+            .q-list .q-card:last-child {
+                border-bottom: 0;
+            }
+
+            .q-list .q-card .q-label {
+                margin: 0;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .q-list .answer-row {
+                grid-template-columns: 210px minmax(0, 1fr);
+                align-items: center;
+            }
+
+            .q-list .pill-option span {
+                min-height: 32px;
+                padding: 4px 6px;
+                font-size: 13px;
+            }
+
+            .q-list textarea.q-comment {
+                min-height: 32px;
+                height: 32px;
+                padding: 5px 10px;
+                font-size: 14px;
+            }
+
+            .q-list .note-text,
+            .q-list .conditional-field {
+                grid-column: 1 / -1;
+            }
+
+            .q-list .conditional-field input {
+                max-width: 420px;
+            }
+
+            /* Photos: label on the left, tiles on the right, one row */
+            .photo-panel {
+                display: grid;
+                grid-template-columns: 170px minmax(0, 1fr);
+                column-gap: 12px;
+                align-items: start;
+                padding: 8px 12px;
+            }
+
+            .photo-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+                margin: 4px 0 0;
+            }
+
+            .photo-msg {
+                grid-column: 2;
+            }
+
+            .photo-strip {
+                grid-template-columns: repeat(auto-fill, minmax(84px, 100px));
+                gap: 8px;
+            }
+
+            .photo-tile .thumb,
+            .photo-add {
+                aspect-ratio: 4 / 3;
+            }
+
+            .photo-tile input.photo-caption {
+                min-height: 30px;
+                padding: 4px 8px;
+                font-size: 13px;
+            }
+
+            .photo-add svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        /* Touch screens wide enough for the compact layout (tablets in landscape)
+           keep 16px text so iOS doesn't zoom on focus */
+        @media (min-width: 900px) and (pointer: coarse) {
+            .q-list textarea.q-comment,
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            select,
+            textarea {
+                font-size: 16px;
+            }
+
+            .q-list .pill-option span {
+                min-height: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -946,27 +1113,7 @@
                         <h3><span>Safety &amp; Operations</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">High-level checks that feed the Safety &amp; Operations section of the report.</p>
 
-                        <div class="form-group q-card" data-q="air_checks" data-pass="Yes">
-                            <label class="q-label">Air checks documented?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="air_checks" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="air_checks" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="air_checks" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="air_checks_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="drums_reversed" data-pass="Yes">
                             <label class="q-label">Drums reversed / washed out properly?</label>
                             <div class="answer-row">
@@ -1015,27 +1162,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group q-card" data-q="properly_mixed" data-pass="Yes">
-                            <label class="q-label">Loads properly mixed before discharge?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="properly_mixed" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="properly_mixed" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="properly_mixed" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="properly_mixed_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
                         <div class="form-group q-card" data-q="batch_tickets_complete" data-pass="Yes">
                             <label class="q-label">Batch tickets complete? <span style="font-weight:400;color:#6b7280;">(mix ID, quantities, water added on site)</span></label>
                             <div class="answer-row">
@@ -1074,6 +1200,7 @@
                                 <textarea class="q-comment" name="environment_safe_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="safety_ops">
                             <div class="photo-head">
@@ -1095,6 +1222,7 @@
                         <h3><span>Water Control</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Water added at the plant: measured, recorded and kept within limits.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="excessive_water" data-pass="No">
                             <label class="q-label">Excessive water added at the plant?</label>
                             <div class="answer-row">
@@ -1137,26 +1265,27 @@
                             </div>
                         </div>
 
-                        <div class="form-group q-card" data-q="water_trims_3gal" data-pass="Yes">
-                            <label class="q-label">Water trims 3 gallons per yard or less?</label>
+                        <div class="form-group q-card" data-q="water_trims_2gal" data-pass="Yes">
+                            <label class="q-label">Water trims 2 gallons per yard or less?</label>
                             <div class="answer-row">
                                 <div class="pill-group">
                                     <label class="pill-option">
-                                        <input type="radio" name="water_trims_3gal" value="Yes" required>
+                                        <input type="radio" name="water_trims_2gal" value="Yes" required>
                                         <span>Yes</span>
                                     </label>
                                     <label class="pill-option">
-                                        <input type="radio" name="water_trims_3gal" value="No">
+                                        <input type="radio" name="water_trims_2gal" value="No">
                                         <span>No</span>
                                     </label>
                                     <label class="pill-option">
-                                        <input type="radio" name="water_trims_3gal" value="N/A">
+                                        <input type="radio" name="water_trims_2gal" value="N/A">
                                         <span>N/A</span>
                                     </label>
                                 </div>
-                                <textarea class="q-comment" name="water_trims_3gal_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                                <textarea class="q-comment" name="water_trims_2gal_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="water_control">
                             <div class="photo-head">
@@ -1182,6 +1311,7 @@
                         <h3><span>Aggregates</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Coarse and fine piles and bins. If only one pile has the issue, say which in the comment.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="stockpiles_managed" data-pass="Yes">
                             <label class="q-label">Stockpiles managed appropriately?</label>
                             <div class="answer-row">
@@ -1308,27 +1438,7 @@
                             </div>
                             <div class="note-text">SSD: saturated surface dry.</div>
                         </div>
-
-                        <div class="form-group q-card" data-q="bins_emptied" data-pass="Yes">
-                            <label class="q-label">Aggregate bins emptied / maintained?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="bins_emptied" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="bins_emptied" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="bins_emptied" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="bins_emptied_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="aggregates">
                             <div class="photo-head">
@@ -1350,27 +1460,7 @@
                         <h3><span>Cement &amp; Silo</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Cement and alternate binder (fly ash, slag) silos, fill pipes and containment.</p>
 
-                        <div class="form-group q-card" data-q="cement_best_practices" data-pass="Yes">
-                            <label class="q-label">Cement best practices followed?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="cement_best_practices" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="cement_best_practices" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="cement_best_practices" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="cement_best_practices_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="fill_pipes_locked" data-pass="Yes">
                             <label class="q-label">Fill pipes locked / secure?</label>
                             <div class="answer-row">
@@ -1433,6 +1523,7 @@
                                 <textarea class="q-comment" name="silo_pipes_no_leaks_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="cement_silo">
                             <div class="photo-head">
@@ -1454,6 +1545,7 @@
                         <h3><span>Admixtures</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Admixture storage, labeling and dispensing lines.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="admix_tanks_labeled" data-pass="Yes">
                             <label class="q-label">Admixture tanks labeled?</label>
                             <div class="answer-row">
@@ -1537,6 +1629,7 @@
                                 <textarea class="q-comment" name="admix_room_locked_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="admixtures">
                             <div class="photo-head">
@@ -1556,12 +1649,13 @@
 
                 </div>
 
-                <!-- PAGE 3: Process Control -->
-                <div class="page" id="page3" data-title="Process Control">
+                <!-- PAGE 3: Process & Plant -->
+                <div class="page" id="page3" data-title="Process &amp; Plant">
                     <div class="form-section" data-section="moisture" data-title="Moisture Control">
                         <h3><span>Moisture Control</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Aggregate moisture drives water accuracy.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="moisture_probes" data-pass="Yes">
                             <label class="q-label">Moisture probes working / moisture tests performed?</label>
                             <div class="answer-row">
@@ -1647,6 +1741,7 @@
                                 <textarea class="q-comment" name="moistures_in_batch_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="moisture">
                             <div class="photo-head">
@@ -1664,114 +1759,11 @@
                         </div>
                     </div>
 
-                    <div class="form-section" data-section="qc_testing" data-title="QC Testing">
-                        <h3><span>QC Testing</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Operator verification tests and test equipment.</p>
-
-                        <div class="form-group q-card" data-q="qc_test_daily" data-pass="Yes">
-                            <label class="q-label">Operator verification: at least one test performed per day?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_test_daily" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_test_daily" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_test_daily" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="qc_test_daily_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="qc_followup_test" data-pass="Yes">
-                            <label class="q-label">Follow up test performed after any change to the mix?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_followup_test" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_followup_test" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="qc_followup_test" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="qc_followup_test_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="testing_tools" data-pass="Yes">
-                            <label class="q-label">Testing tools & equipment available?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="testing_tools" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="testing_tools" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="testing_tools" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="testing_tools_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="test_equipment_maintained" data-pass="Yes">
-                            <label class="q-label">Test equipment properly maintained, calibrated and stored?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="test_equipment_maintained" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="test_equipment_maintained" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="test_equipment_maintained" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="test_equipment_maintained_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="photo-panel" data-photos="qc_testing">
-                            <div class="photo-head">
-                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>QC Testing photos</span>
-                                <span class="photo-count">0 of 4</span>
-                            </div>
-                            <div class="photo-strip">
-                                <label class="photo-add">
-                                    <input type="file" accept="image/*" multiple>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
-                                    <span class="photo-add-text">Add photo</span>
-                                </label>
-                            </div>
-                            <div class="photo-msg" role="status"></div>
-                        </div>
-                    </div>
-
                     <div class="form-section" data-section="certifications" data-title="Certifications &amp; Calibration">
                         <h3><span>Certifications &amp; Calibration</span><span class="sec-chip"></span></h3>
                         <p class="section-caption">Plant certification, scale and meter checks.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="nrmca_cert_current" data-pass="Yes">
                             <label class="q-label">NRMCA plant certification valid for at least the next 3 months?</label>
                             <div class="answer-row">
@@ -1876,6 +1868,7 @@
                                 <textarea class="q-comment" name="scales_zero_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="certifications">
                             <div class="photo-head">
@@ -1893,56 +1886,11 @@
                         </div>
                     </div>
 
-                </div>
-
-                <!-- PAGE 4: Batch Plant -->
-                <div class="page" id="page4" data-title="Batch Plant">
                     <div class="form-section" data-section="batch_computer" data-title="Batch Computer">
                         <h3><span>Batch Computer</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Tolerance limits in the batch computer and batching accuracy.</p>
+                        <p class="section-caption">Batching accuracy against tolerance.</p>
 
-                        <div class="form-group q-card" data-q="admix_limits_set" data-pass="Yes">
-                            <label class="q-label">Admixture over/under limits properly set?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="admix_limits_set" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="admix_limits_set" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="admix_limits_set" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="admix_limits_set_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="material_limits_set" data-pass="Yes">
-                            <label class="q-label">All material over/under limits properly set?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="material_limits_set" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="material_limits_set" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="material_limits_set" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="material_limits_set_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="tol_solids" data-pass="Yes">
                             <label class="q-label">Batches solid materials within 1%?</label>
                             <div class="answer-row">
@@ -2005,6 +1953,7 @@
                                 <textarea class="q-comment" name="tol_water_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="batch_computer">
                             <div class="photo-head">
@@ -2024,8 +1973,9 @@
 
                     <div class="form-section" data-section="plant_equipment" data-title="Plant Equipment">
                         <h3><span>Plant Equipment</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Overhead bins, belts and truck discharge.</p>
+                        <p class="section-caption">Overhead bins and truck discharge.</p>
 
+                    <div class="q-list">
                         <div class="form-group q-card" data-q="overhead_bins_condition" data-pass="Yes">
                             <label class="q-label">Overhead bins free of rust and holes?</label>
                             <div class="answer-row">
@@ -2044,48 +1994,6 @@
                                     </label>
                                 </div>
                                 <textarea class="q-comment" name="overhead_bins_condition_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="overhead_bins_clean" data-pass="Yes">
-                            <label class="q-label">Overhead bins free of contamination?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="overhead_bins_clean" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="overhead_bins_clean" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="overhead_bins_clean" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="overhead_bins_clean_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group q-card" data-q="belts_condition" data-pass="Yes">
-                            <label class="q-label">Belts free of holes and ruts?</label>
-                            <div class="answer-row">
-                                <div class="pill-group">
-                                    <label class="pill-option">
-                                        <input type="radio" name="belts_condition" value="Yes" required>
-                                        <span>Yes</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="belts_condition" value="No">
-                                        <span>No</span>
-                                    </label>
-                                    <label class="pill-option">
-                                        <input type="radio" name="belts_condition" value="N/A">
-                                        <span>N/A</span>
-                                    </label>
-                                </div>
-                                <textarea class="q-comment" name="belts_condition_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
 
@@ -2109,6 +2017,7 @@
                                 <textarea class="q-comment" name="discharge_boot_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
                         </div>
+                    </div>
 
                         <div class="photo-panel" data-photos="plant_equipment">
                             <div class="photo-head">
@@ -2128,8 +2037,8 @@
 
                 </div>
 
-                <!-- PAGE 5: Final Comments -->
-                <div class="page" id="page5" data-title="Final Comments">
+                <!-- PAGE 4: Final Comments -->
+                <div class="page" id="page4" data-title="Final Comments">
                     <div class="form-section" data-notes="1" data-title="Final Comments">
                         <h3>Final Comments</h3>
                         <p class="section-caption">These appear in the Comments &amp; Notes block at the end of the report.</p>
@@ -2769,8 +2678,9 @@
     // Comment boxes grow with their text (one line until more is typed)
     function autoGrow(ta) {
       if (!ta || !ta.offsetParent) return; // hidden page: sized when shown
+      const minH = parseFloat(getComputedStyle(ta).minHeight) || 46;
       ta.style.height = "auto";
-      ta.style.height = Math.max(46, ta.scrollHeight + 2) + "px";
+      ta.style.height = Math.max(minH, ta.scrollHeight + 2) + "px";
     }
 
     // A card fails when its answer is not the passing one (N/A never fails;
