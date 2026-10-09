@@ -703,6 +703,18 @@
             margin-top: 6px;
         }
 
+        /* Phones: while a text box has focus (keyboard up), the sticky nav and
+           the slim header step aside so the field stays visible */
+        @media (max-width: 639px) {
+            body.typing .button-row {
+                position: static;
+            }
+
+            body.typing .slim-bar {
+                transform: translateY(-105%);
+            }
+        }
+
         /* Photo strip at the bottom of each section */
         .photo-panel {
             background: #ffffff;
@@ -1050,8 +1062,6 @@
                 <div class="page active" id="page1" data-title="Visit &amp; Production">
                     <div class="form-section">
                         <h3>Basic Information</h3>
-                        <p class="section-caption">Core visit details for the QA log and report.</p>
-
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Date <span class="required">*</span></label>
@@ -1111,7 +1121,6 @@
 
                     <div class="form-section" data-section="safety_ops" data-title="Safety &amp; Operations">
                         <h3><span>Safety &amp; Operations</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">High-level checks that feed the Safety &amp; Operations section of the report.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="drums_reversed" data-pass="Yes">
@@ -1205,7 +1214,7 @@
                         <div class="photo-panel" data-photos="safety_ops">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Safety &amp; Operations photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1220,7 +1229,6 @@
 
                     <div class="form-section" data-section="water_control" data-title="Water Control">
                         <h3><span>Water Control</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Water added at the plant: measured, recorded and kept within limits.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="excessive_water" data-pass="No">
@@ -1290,7 +1298,7 @@
                         <div class="photo-panel" data-photos="water_control">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Water Control photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1309,7 +1317,6 @@
                 <div class="page" id="page2" data-title="Raw Materials">
                     <div class="form-section" data-section="aggregates" data-title="Aggregates">
                         <h3><span>Aggregates</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Coarse and fine piles and bins. If only one pile has the issue, say which in the comment.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="stockpiles_managed" data-pass="Yes">
@@ -1443,7 +1450,7 @@
                         <div class="photo-panel" data-photos="aggregates">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Aggregates photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1458,7 +1465,6 @@
 
                     <div class="form-section" data-section="cement_silo" data-title="Cement &amp; Silo">
                         <h3><span>Cement &amp; Silo</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Cement and alternate binder (fly ash, slag) silos, fill pipes and containment.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="fill_pipes_locked" data-pass="Yes">
@@ -1528,7 +1534,7 @@
                         <div class="photo-panel" data-photos="cement_silo">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Cement &amp; Silo photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1543,7 +1549,6 @@
 
                     <div class="form-section" data-section="admixtures" data-title="Admixtures">
                         <h3><span>Admixtures</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Admixture storage, labeling and dispensing lines.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="admix_tanks_labeled" data-pass="Yes">
@@ -1634,7 +1639,7 @@
                         <div class="photo-panel" data-photos="admixtures">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Admixtures photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1653,7 +1658,6 @@
                 <div class="page" id="page3" data-title="Process &amp; Plant">
                     <div class="form-section" data-section="moisture" data-title="Moisture Control">
                         <h3><span>Moisture Control</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Aggregate moisture drives water accuracy.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="moisture_probes" data-pass="Yes">
@@ -1675,11 +1679,10 @@
                                 </div>
                                 <textarea class="q-comment" name="moisture_probes_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
                             </div>
-                            <div class="note-text">Aggregate moisture drives water accuracy &mdash; probes reading sanely or daily tests on record.</div>
                         </div>
 
                         <div class="form-group q-card" data-q="moisture_daily" data-pass="Yes">
-                            <label class="q-label">Moisture determinations done at least once per day?</label>
+                            <label class="q-label">Moisture determinations done at least twice per day?</label>
                             <div class="answer-row">
                                 <div class="pill-group">
                                     <label class="pill-option">
@@ -1746,7 +1749,7 @@
                         <div class="photo-panel" data-photos="moisture">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Moisture Control photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1761,7 +1764,6 @@
 
                     <div class="form-section" data-section="certifications" data-title="Certifications &amp; Calibration">
                         <h3><span>Certifications &amp; Calibration</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Plant certification, scale and meter checks.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="nrmca_cert_current" data-pass="Yes">
@@ -1873,7 +1875,7 @@
                         <div class="photo-panel" data-photos="certifications">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Certifications &amp; Calibration photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1888,7 +1890,6 @@
 
                     <div class="form-section" data-section="batch_computer" data-title="Batch Computer">
                         <h3><span>Batch Computer</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Batching accuracy against tolerance.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="tol_solids" data-pass="Yes">
@@ -1958,7 +1959,7 @@
                         <div class="photo-panel" data-photos="batch_computer">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Batch Computer photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -1973,7 +1974,6 @@
 
                     <div class="form-section" data-section="plant_equipment" data-title="Plant Equipment">
                         <h3><span>Plant Equipment</span><span class="sec-chip"></span></h3>
-                        <p class="section-caption">Overhead bins and truck discharge.</p>
 
                     <div class="q-list">
                         <div class="form-group q-card" data-q="overhead_bins_condition" data-pass="Yes">
@@ -2022,7 +2022,7 @@
                         <div class="photo-panel" data-photos="plant_equipment">
                             <div class="photo-head">
                                 <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Plant Equipment photos</span>
-                                <span class="photo-count">0 of 4</span>
+                                <span class="photo-count"></span>
                             </div>
                             <div class="photo-strip">
                                 <label class="photo-add">
@@ -2041,7 +2041,6 @@
                 <div class="page" id="page4" data-title="Final Comments">
                     <div class="form-section" data-notes="1" data-title="Final Comments">
                         <h3>Final Comments</h3>
-                        <p class="section-caption">These appear in the Comments &amp; Notes block at the end of the report.</p>
 
                         <div class="form-group">
                             <label>Daily Operations Comments</label>
@@ -2117,9 +2116,9 @@
   // emailed to QA Admin alone (no plant recipients) and logged as TEST.
   const TEST_MODE = true;
 
-  // Photo limits: per section, per report, and a size budget that keeps the
-  // whole submission under the Vercel proxy's 4.5 MB request cap.
-  const PHOTOS_PER_SECTION = 4;
+  // Photo limits: any section can take any number, up to PHOTOS_PER_REPORT
+  // for the whole report, plus a size budget that keeps the submission under
+  // the Vercel proxy's 4.5 MB request cap.
   const PHOTOS_PER_REPORT = 24;
   const PHOTO_BUDGET_CHARS = 3600000;
   const MAX_BODY_CHARS = 4200000;
@@ -2354,7 +2353,7 @@
         btn.addEventListener("click", () => {
           photos = photos.filter((x) => x.id !== p.id);
           photoMessage(panel, "");
-          renderPhotos(sectionId);
+          renderAllPhotos(); // a freed slot re-opens Add in every section
           savePhotos();
         });
         thumb.appendChild(btn);
@@ -2376,8 +2375,9 @@
         strip.insertBefore(tile, addTile);
       });
 
-      panel.querySelector(".photo-count").textContent = mine.length + " of " + PHOTOS_PER_SECTION;
-      if (addTile) addTile.classList.toggle("full", mine.length >= PHOTOS_PER_SECTION);
+      panel.querySelector(".photo-count").textContent =
+        mine.length === 0 ? "" : mine.length === 1 ? "1 photo" : mine.length + " photos";
+      if (addTile) addTile.classList.toggle("full", photos.length >= PHOTOS_PER_REPORT);
     }
 
     function renderAllPhotos() {
@@ -2396,18 +2396,12 @@
         if (!files.length) return;
         photoMessage(panel, "");
         if (addText) addText.textContent = "Adding…";
-        // One batch at a time per section, so the 4 photo limit can't be
-        // raced by a second pick while the first is still compressing
+        // One batch at a time per section (a second pick waits for the first)
         input.disabled = true;
         photoJobs++;
 
         try {
           for (const file of files) {
-            const inSection = photos.filter((p) => p.section === sectionId).length;
-            if (inSection >= PHOTOS_PER_SECTION) {
-              photoMessage(panel, "This section holds " + PHOTOS_PER_SECTION + " photos. Remove one to add another.");
-              break;
-            }
             if (photos.length >= PHOTOS_PER_REPORT) {
               photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
               break;
@@ -2419,6 +2413,11 @@
 
             try {
               const data = await compressImage(file);
+              // Re-checked after the await: another section may have filled the report meanwhile
+              if (photos.length >= PHOTOS_PER_REPORT) {
+                photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
+                break;
+              }
               if (photoChars() + data.length > PHOTO_BUDGET_CHARS) {
                 photoMessage(panel, "This report has reached its photo size limit. Remove a photo to add another.");
                 break;
@@ -2433,7 +2432,7 @@
           photoJobs--;
           input.disabled = false;
           if (addText) addText.textContent = "Add photo";
-          renderPhotos(sectionId);
+          renderAllPhotos();
           savePhotos();
         }
       });
@@ -2637,14 +2636,14 @@
       let note = "";
       if (draft.fromV1) {
         // Old drafts had one photo box at the end ({name, data} items):
-        // spread them over the first sections in page order
-        (Array.isArray(draft.d.photos) ? draft.d.photos : []).forEach((p, i) => {
-          const sec = sectionOrder[Math.floor(i / PHOTOS_PER_SECTION)];
-          if (sec && p && p.data) {
+        // they go into the first section, where the inspector can sort them
+        (Array.isArray(draft.d.photos) ? draft.d.photos : []).forEach((p) => {
+          const sec = sectionOrder[0];
+          if (sec && p && p.data && restored.length < PHOTOS_PER_REPORT) {
             restored.push({ id: newPhotoId(), section: sec, name: p.name || "photo.jpg", caption: "", data: p.data });
           }
         });
-        if (restored.length) note = " Its photos were placed in the first sections.";
+        if (restored.length) note = " Its photos were placed under " + sectionTitle(sectionOrder[0]) + ".";
       } else {
         let saved = null;
         try { saved = await withTimeout(idbGet("photos"), 4000); } catch (e) {}
@@ -2761,6 +2760,24 @@
         clearDraft().then(() => location.reload());
       });
     }
+
+    // === Typing on a phone ===
+    // The on-screen keyboard takes half the screen; the sticky Previous/Next
+    // bar and the slim header would cover the field being typed in. While a
+    // text box has focus they step aside (CSS on body.typing).
+    function isTextField(el) {
+      return !!el && (el.tagName === "TEXTAREA" ||
+        (el.tagName === "INPUT" && /^(text|email|search|tel|number|url)$/.test(el.type)));
+    }
+    document.addEventListener("focusin", (e) => {
+      if (isTextField(e.target)) document.body.classList.add("typing");
+    });
+    document.addEventListener("focusout", (e) => {
+      if (!isTextField(e.target)) return;
+      setTimeout(() => {
+        if (!isTextField(document.activeElement)) document.body.classList.remove("typing");
+      }, 60);
+    });
 
     // === Report structure sent with the flat fields ===
     // The backend renders the PDF/email from this, so questions added or
