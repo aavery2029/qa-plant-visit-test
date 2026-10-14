@@ -2134,7 +2134,10 @@
 
   // === Turnstile: script loads early, the challenge runs only when Submit is
   // pressed (tokens live 5 minutes and a visit takes longer than that to fill in).
-  const turnstileState = { widgetId: null, onToken: null, onFail: null };
+  // lastError: why the last token fetch produced no token; sent to the proxy as
+  // cf_turnstile_error so the runtime log can tell a blocked script from a
+  // refused domain. The proxy logs it and strips it before forwarding.
+  const turnstileState = { widgetId: null, onToken: null, onFail: null, lastError: "" };
 
   function loadTurnstileScript() {
     if (!TURNSTILE_SITE_KEY || window.turnstile || document.getElementById("turnstileScript")) return;
@@ -2162,23 +2165,30 @@
   // on answers 403 and the user sees "reload and try again".
   async function getTurnstileToken() {
     if (!TURNSTILE_SITE_KEY) return null;
+    turnstileState.lastError = "";
     loadTurnstileScript();
     if (!(await waitForTurnstile(10000))) {
       console.warn("Turnstile script not available; submitting without a token");
+      turnstileState.lastError = "script-not-loaded";
       return null;
     }
     const box = document.getElementById("turnstileBox");
     return new Promise((resolve) => {
       let settled = false;
-      const timer = setTimeout(() => finish(null), 60000);
+      const timer = setTimeout(() => fail("timeout-60s"), 60000);
       function finish(value) {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        if (!value) turnstileState.lastError = turnstileState.lastError || "empty-token";
         resolve(value || null);
       }
+      function fail(reason) {
+        if (!settled) turnstileState.lastError = reason;
+        finish(null);
+      }
       turnstileState.onToken = finish;
-      turnstileState.onFail = () => finish(null);
+      turnstileState.onFail = fail;
       try {
         if (turnstileState.widgetId === null) {
           turnstileState.widgetId = window.turnstile.render(box, {
@@ -2187,9 +2197,9 @@
             execution: "execute",
             appearance: "interaction-only",
             callback: (token) => turnstileState.onToken && turnstileState.onToken(token),
-            "error-callback": () => turnstileState.onFail && turnstileState.onFail(),
+            "error-callback": (code) => turnstileState.onFail && turnstileState.onFail("error:" + (code || "unknown")),
             "expired-callback": () => {},
-            "timeout-callback": () => turnstileState.onFail && turnstileState.onFail(),
+            "timeout-callback": () => turnstileState.onFail && turnstileState.onFail("timeout-callback"),
           });
         } else {
           window.turnstile.reset(turnstileState.widgetId);
@@ -2197,7 +2207,7 @@
         window.turnstile.execute(turnstileState.widgetId);
       } catch (err) {
         console.warn("Turnstile error", err);
-        finish(null);
+        fail("render-error");
       }
     });
   }
@@ -3003,6 +3013,7 @@
         if (loadingMsg) loadingMsg.textContent = "Checking the submission…";
         const tsToken = await getTurnstileToken();
         if (tsToken) data.cf_turnstile_token = tsToken;
+        else if (TURNSTILE_SITE_KEY) data.cf_turnstile_error = turnstileState.lastError || "no-token";
 
         // Check payload size before sending
         let jsonBody = JSON.stringify(data);
