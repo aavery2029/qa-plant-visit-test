@@ -2074,6 +2074,9 @@
                                 A copy of the report will be emailed here (quikrete-readymix.com addresses only). QA Admin is always BCC’d automatically.
                             </div>
                         </div>
+
+                        <!-- Turnstile renders here only if it needs the user to interact -->
+                        <div id="turnstileBox" style="margin-top:10px;"></div>
                     </div>
 
                 </div>
@@ -2116,6 +2119,11 @@
   // emailed to QA Admin alone (no plant recipients) and logged as TEST.
   const TEST_MODE = true;
 
+  // Cloudflare Turnstile bot check (proxy verifies the token server-side).
+  // Empty = off: no script is loaded and no token is sent. Set to the widget's
+  // SITE key (public) once the widget exists; the SECRET key lives in Vercel only.
+  const TURNSTILE_SITE_KEY = "";
+
   // Photo limits: any section can take any number, up to PHOTOS_PER_REPORT
   // for the whole report, plus a size budget that keeps the submission under
   // the Vercel proxy's 4.5 MB request cap.
@@ -2123,7 +2131,79 @@
   const PHOTO_BUDGET_CHARS = 3600000;
   const MAX_BODY_CHARS = 4200000;
 
+  // === Turnstile: script loads early, the challenge runs only when Submit is
+  // pressed (tokens live 5 minutes and a visit takes longer than that to fill in).
+  const turnstileState = { widgetId: null, onToken: null, onFail: null };
+
+  function loadTurnstileScript() {
+    if (!TURNSTILE_SITE_KEY || window.turnstile || document.getElementById("turnstileScript")) return;
+    const s = document.createElement("script");
+    s.id = "turnstileScript";
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
+  function waitForTurnstile(ms) {
+    return new Promise((resolve) => {
+      const started = Date.now();
+      (function poll() {
+        if (window.turnstile) return resolve(true);
+        if (Date.now() - started > ms) return resolve(false);
+        setTimeout(poll, 100);
+      })();
+    });
+  }
+
+  // Resolves to a fresh token, or null when Turnstile is off or unavailable.
+  // With no token the proxy decides: enforcement off forwards anyway, enforcement
+  // on answers 403 and the user sees "reload and try again".
+  async function getTurnstileToken() {
+    if (!TURNSTILE_SITE_KEY) return null;
+    loadTurnstileScript();
+    if (!(await waitForTurnstile(10000))) {
+      console.warn("Turnstile script not available; submitting without a token");
+      return null;
+    }
+    const box = document.getElementById("turnstileBox");
+    return new Promise((resolve) => {
+      let settled = false;
+      const timer = setTimeout(() => finish(null), 60000);
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(value || null);
+      }
+      turnstileState.onToken = finish;
+      turnstileState.onFail = () => finish(null);
+      try {
+        if (turnstileState.widgetId === null) {
+          turnstileState.widgetId = window.turnstile.render(box, {
+            sitekey: TURNSTILE_SITE_KEY,
+            action: "qa_submit",
+            execution: "execute",
+            appearance: "interaction-only",
+            callback: (token) => turnstileState.onToken && turnstileState.onToken(token),
+            "error-callback": () => turnstileState.onFail && turnstileState.onFail(),
+            "expired-callback": () => {},
+            "timeout-callback": () => turnstileState.onFail && turnstileState.onFail(),
+          });
+        } else {
+          window.turnstile.reset(turnstileState.widgetId);
+        }
+        window.turnstile.execute(turnstileState.widgetId);
+      } catch (err) {
+        console.warn("Turnstile error", err);
+        finish(null);
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    loadTurnstileScript();
+
     // Page controls
     const pages = Array.from(document.querySelectorAll(".page"));
     const totalPages = pages.length;
@@ -2918,8 +2998,13 @@
             }));
         }
 
+        // Bot check token, fetched at Submit time so it is fresh
+        if (loadingMsg) loadingMsg.textContent = "Checking the submission…";
+        const tsToken = await getTurnstileToken();
+        if (tsToken) data.cf_turnstile_token = tsToken;
+
         // Check payload size before sending
-        const jsonBody = JSON.stringify(data);
+        let jsonBody = JSON.stringify(data);
         const payloadSizeMB = (jsonBody.length / (1024 * 1024)).toFixed(1);
         console.log("Payload size: " + payloadSizeMB + " MB");
         if (jsonBody.length > MAX_BODY_CHARS) {
@@ -2964,6 +3049,7 @@
               const msg = payload && payload.message ? payload.message : "Submission failed on server.";
               const e = new Error(msg);
               e.noRetry = true;   // the server answered; retrying won't change it
+              e.verification = res.status === 403;   // bot check refused (expired or used token)
               throw e;
             }
             return true;
@@ -2982,7 +3068,18 @@
         }
 
         try {
-          await attemptSubmit(1);
+          try {
+            await attemptSubmit(1);
+          } catch (err) {
+            // The proxy refused the bot check: get a fresh token and send the
+            // same report once more. Anything else is reported as before.
+            if (!(err.verification && TURNSTILE_SITE_KEY)) throw err;
+            const fresh = await getTurnstileToken();
+            if (!fresh) throw err;
+            data.cf_turnstile_token = fresh;
+            jsonBody = JSON.stringify(data);
+            await attemptSubmit(1);
+          }
           submitted = true;
           clearDraft();
           if (loadingSpinner) loadingSpinner.classList.remove("show");
