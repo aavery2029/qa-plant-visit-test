@@ -1001,7 +1001,20 @@
                 min-height: 40px;
             }
         }
-    </style>
+    
+        /* Material source rows (Houston, 10/19): picker + typed supplier on one
+           line; "Other (type it)" opens a box for a material not on the list */
+        .q-card.q-pair .answer-row { grid-template-columns: minmax(0, 1fr); }
+        .q-card.q-pair .pair-row { display: grid; grid-template-columns: 6.6em minmax(0, 1fr); gap: 8px; }
+        .q-card.q-pair select, .q-card.q-pair input[type="text"] { width: 100%; }
+        .q-card.q-pair .pair-other { display: none; margin-top: 8px; }
+        .q-card.q-pair .pair-other.show { display: block; }
+        @media (min-width: 900px) {
+            .q-list .q-card.q-pair .answer-row { grid-template-columns: minmax(0, 1fr); }
+            .q-list .q-card.q-pair input[type="text"],
+            .q-list .q-card.q-pair select { min-height: 32px; padding: 5px 10px; font-size: 14px; }
+        }
+</style>
 </head>
 <body>
 <div class="page-shell">
@@ -1320,6 +1333,50 @@
                         <h3><span>Aggregates</span><span class="sec-chip"></span></h3>
 
                     <div class="q-list">
+                        <div class="form-group q-card q-pair" data-q="agg_source_1" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 1</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_1_material" aria-label="Aggregate 1 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 1 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 1 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_2" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 2</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_2_material" aria-label="Aggregate 2 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 2 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 2 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_3" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 3</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_3_material" aria-label="Aggregate 3 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 3 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 3 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_4" data-kind="pair">
+                            <label class="q-label">Aggregate 4 <span style="font-weight:400;color:#6b7280;">(if used)</span></label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_4_material" aria-label="Aggregate 4 material"><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_4" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 4 supplier">
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_4_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 4 material name">
+                            </div>
+                        </div>
+
                         <div class="form-group q-card" data-q="stockpiles_managed" data-pass="Yes">
                             <label class="q-label">Stockpiles managed appropriately?</label>
                             <div class="answer-row">
@@ -1468,6 +1525,39 @@
                         <h3><span>Cement &amp; Silo</span><span class="sec-chip"></span></h3>
 
                     <div class="q-list">
+                        <div class="form-group q-card q-pair" data-q="silo_source_1" data-kind="pair" data-required="1">
+                            <label class="q-label">Silo 1</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_1_material" aria-label="Silo 1 material" required><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 1 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 1 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="silo_source_2" data-kind="pair" data-required="1">
+                            <label class="q-label">Silo 2</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_2_material" aria-label="Silo 2 material" required><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 2 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 2 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="silo_source_3" data-kind="pair">
+                            <label class="q-label">Silo 3 <span style="font-weight:400;color:#6b7280;">(if used)</span></label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_3_material" aria-label="Silo 3 material"><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 3 supplier">
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 3 material name">
+                            </div>
+                        </div>
+
                         <div class="form-group q-card" data-q="fill_pipes_locked" data-pass="Yes">
                             <label class="q-label">Fill pipes locked / secure?</label>
                             <div class="answer-row">
@@ -2781,8 +2871,37 @@
       return !!(pass && checked && checked.value !== pass && checked.value !== "N/A");
     }
 
+    // A material-source row (data-kind="pair") is answered by its typed
+    // supplier: "57LS: Cemex Katy", or the typed name when Other is picked.
+    // Every other card is answered by its picked pill.
+    function cardValue(card) {
+      if (card.dataset.kind === "pair") {
+        const sel = card.querySelector("select");
+        const other = card.querySelector("input.pair-other");
+        const src = card.querySelector('input[type="text"]:not(.pair-other)');
+        let m = sel ? sel.value.trim() : "";
+        if (m === "Other") m = other ? other.value.trim() : "";
+        const s = src ? src.value.trim() : "";
+        return s ? (m ? m + ": " + s : s) : "";
+      }
+      const picked = card.querySelector('input[type="radio"]:checked');
+      return picked ? picked.value : "";
+    }
+
+    // "Other (type it)" shows the material name box, required on a required row
+    function syncPairOther(card) {
+      const sel = card.querySelector("select");
+      const other = card.querySelector("input.pair-other");
+      if (!sel || !other) return;
+      const on = sel.value === "Other";
+      other.classList.toggle("show", on);
+      other.required = on && card.dataset.required === "1";
+      if (!on) other.classList.remove("invalid");
+    }
+
     function syncCard(card) {
-      const checked = card.querySelector('input[type="radio"]:checked');
+      if (card.dataset.kind === "pair") syncPairOther(card);
+      const checked = cardValue(card);
       const failing = isFailing(card);
       card.classList.toggle("answered", !!checked);
       card.classList.toggle("failing", failing);
@@ -2798,7 +2917,7 @@
       const chip = section.querySelector(".sec-chip");
       if (!chip) return;
       const cards = Array.from(section.querySelectorAll(".q-card"));
-      const done = cards.filter((c) => c.querySelector('input[type="radio"]:checked')).length;
+      const done = cards.filter((c) => cardValue(c) !== "").length;
       chip.textContent = done + " of " + cards.length + " answered";
       chip.classList.toggle("done", cards.length > 0 && done === cards.length);
     }
@@ -2882,12 +3001,11 @@
       document.querySelectorAll(".form-section[data-section]").forEach((sec) => {
         const questions = [];
         sec.querySelectorAll(".q-card").forEach((card) => {
-          const checked = card.querySelector('input[type="radio"]:checked');
           const comment = card.querySelector("textarea.q-comment");
           const q = {
             key: card.dataset.q,
             label: cleanText(card.querySelector(".q-label")),
-            answer: checked ? checked.value : "",
+            answer: cardValue(card),
             comment: comment ? comment.value.trim() : "",
             pass: card.dataset.pass || ""
           };
