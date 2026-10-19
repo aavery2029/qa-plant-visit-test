@@ -66,8 +66,10 @@
             width: 100%;
             height: auto;
             display: block;
-            max-height: 320px;
+            max-height: 110px;
             object-fit: cover;
+            /* keep the "Quikrete QA Plant Visit Checklist" title band in view */
+            object-position: 50% 72%;
         }
 
         /* Fixed slim brand bar: slides in once the big header scrolls away.
@@ -453,37 +455,6 @@
             display: block;
         }
 
-        .file-upload {
-            margin-top: 8px;
-        }
-
-        .file-upload input[type="file"] {
-            font-size: 12px;
-        }
-
-        .file-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .image-preview {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .remove-btn {
             position: absolute;
             top: 3px;
@@ -635,6 +606,7 @@
             padding: 14px 18px;
             border-radius: 12px;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             gap: 10px;
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
@@ -655,7 +627,394 @@
                 transform: rotate(360deg);
             }
         }
-    </style>
+        /* Section header: title left, live "n of m answered" chip right */
+        .sec-chip {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0;
+            text-transform: none;
+            color: #cbd5e1;
+            white-space: nowrap;
+        }
+
+        .sec-chip.done {
+            color: var(--brand-yellow);
+        }
+
+        .page-name {
+            margin-left: 6px;
+            color: var(--brand-yellow);
+            font-weight: 500;
+        }
+
+        .test-banner {
+            display: none;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Answer bar and comment box side by side; stacked on phones */
+        .answer-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 8px;
+        }
+
+        @media (min-width: 640px) {
+            .answer-row {
+                grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+                align-items: start;
+            }
+        }
+
+        .answer-row .pill-group {
+            margin-top: 0;
+        }
+
+        .form-group .answer-row .pill-option {
+            margin-bottom: 0;
+        }
+
+        textarea.q-comment {
+            min-height: 46px;
+            height: 46px;
+            line-height: 1.35;
+            resize: none;
+            overflow: hidden;
+        }
+
+        /* A failing answer turns the rail and the comment box amber */
+        .form-group.answered.failing {
+            border-left-color: #d97706;
+        }
+
+        textarea.q-comment.flag {
+            border-color: #d97706;
+            background: #fffbeb;
+        }
+
+        .q-card .note-text {
+            margin-top: 6px;
+        }
+
+        /* Phones: while a text box has focus (keyboard up), the sticky nav and
+           the slim header step aside so the field stays visible */
+        @media (max-width: 639px) {
+            body.typing .button-row {
+                position: static;
+            }
+
+            body.typing .slim-bar {
+                transform: translateY(-105%);
+            }
+        }
+
+        /* Photo strip at the bottom of each section */
+        .photo-panel {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 4px;
+        }
+
+        .photo-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .photo-head svg {
+            width: 18px;
+            height: 18px;
+            vertical-align: -4px;
+            margin-right: 6px;
+        }
+
+        .photo-count {
+            font-weight: 500;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        .photo-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+            gap: 10px;
+        }
+
+        .photo-tile .thumb {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            background: #f3f4f6;
+        }
+
+        .photo-tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-tile input.photo-caption {
+            margin-top: 6px;
+            padding: 6px 8px;
+            min-height: 36px;
+        }
+
+        .photo-tile .remove-btn {
+            top: 4px;
+            right: 4px;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            line-height: 28px;
+            padding: 0;
+        }
+
+        .photo-add {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            border: 1.5px dashed #94a3b8;
+            border-radius: 8px;
+            background: #f9fafb;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .photo-add svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .photo-add input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .photo-add:focus-within {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+
+        .photo-add.full {
+            display: none;
+        }
+
+        .photo-msg {
+            display: none;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #991b1b;
+        }
+
+        .photo-msg.show {
+            display: block;
+        }
+
+        @media (min-width: 640px) {
+            .brand-header-inner img {
+                max-height: 160px;
+            }
+        }
+
+        /* ===== Computers: compact layout (phones keep the big cards) ===== */
+        /* Answer targets stay glove sized on phones and touch tablets; with a
+           mouse, a section reads as one card with one line per question. */
+        @media (min-width: 900px) {
+            .form-section {
+                padding: 0 14px 12px;
+                margin-bottom: 14px;
+            }
+
+            .form-section h3 {
+                margin: 0 -14px 8px;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .section-caption {
+                margin: 0 0 8px;
+            }
+
+            .form-group {
+                padding: 8px 12px 10px;
+                margin-bottom: 8px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+                margin-bottom: 4px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            select,
+            textarea {
+                padding: 7px 10px;
+                font-size: 15px;
+            }
+
+            input[type="date"] {
+                min-height: 38px;
+            }
+
+            .q-list {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+
+            .q-list .q-card {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+                column-gap: 14px;
+                align-items: center;
+                margin: 0;
+                padding: 6px 12px 6px 10px;
+                border: 0;
+                border-left: 4px solid #cbd5e1;
+                border-bottom: 1px solid #eef0f3;
+                border-radius: 0;
+            }
+
+            .q-list .q-card:last-child {
+                border-bottom: 0;
+            }
+
+            .q-list .q-card .q-label {
+                margin: 0;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .q-list .answer-row {
+                grid-template-columns: 210px minmax(0, 1fr);
+                align-items: center;
+            }
+
+            .q-list .pill-option span {
+                min-height: 32px;
+                padding: 4px 6px;
+                font-size: 13px;
+            }
+
+            .q-list textarea.q-comment {
+                min-height: 32px;
+                height: 32px;
+                padding: 5px 10px;
+                font-size: 14px;
+            }
+
+            .q-list .note-text,
+            .q-list .conditional-field {
+                grid-column: 1 / -1;
+            }
+
+            .q-list .conditional-field input {
+                max-width: 420px;
+            }
+
+            /* Photos: label on the left, tiles on the right, one row */
+            .photo-panel {
+                display: grid;
+                grid-template-columns: 170px minmax(0, 1fr);
+                column-gap: 12px;
+                align-items: start;
+                padding: 8px 12px;
+            }
+
+            .photo-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+                margin: 4px 0 0;
+            }
+
+            .photo-msg {
+                grid-column: 2;
+            }
+
+            .photo-strip {
+                grid-template-columns: repeat(auto-fill, minmax(84px, 100px));
+                gap: 8px;
+            }
+
+            .photo-tile .thumb,
+            .photo-add {
+                aspect-ratio: 4 / 3;
+            }
+
+            .photo-tile input.photo-caption {
+                min-height: 30px;
+                padding: 4px 8px;
+                font-size: 13px;
+            }
+
+            .photo-add svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        /* Touch screens wide enough for the compact layout (tablets in landscape)
+           keep 16px text so iOS doesn't zoom on focus */
+        @media (min-width: 900px) and (pointer: coarse) {
+            .q-list textarea.q-comment,
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            select,
+            textarea {
+                font-size: 16px;
+            }
+
+            .q-list .pill-option span {
+                min-height: 40px;
+            }
+        }
+    
+        /* Material source rows (Houston, 10/19): picker + typed supplier on one
+           line; "Other (type it)" opens a box for a material not on the list */
+        .q-card.q-pair .answer-row { grid-template-columns: minmax(0, 1fr); }
+        .q-card.q-pair .pair-row { display: grid; grid-template-columns: 6.6em minmax(0, 1fr); gap: 8px; }
+        .q-card.q-pair select, .q-card.q-pair input[type="text"] { width: 100%; }
+        .q-card.q-pair .pair-other { display: none; margin-top: 8px; }
+        .q-card.q-pair .pair-other.show { display: block; }
+        @media (min-width: 900px) {
+            .q-list .q-card.q-pair .answer-row { grid-template-columns: minmax(0, 1fr); }
+            .q-list .q-card.q-pair input[type="text"],
+            .q-list .q-card.q-pair select { min-height: 32px; padding: 5px 10px; font-size: 14px; }
+        }
+</style>
 </head>
 <body>
 <div class="page-shell">
@@ -666,7 +1025,7 @@
             <small>QUIKRETE</small>
             QA Plant Visit Checklist
         </div>
-        <div class="slim-page">Page <span id="slimPage">1</span> of <span id="slimTotal">2</span></div>
+        <div class="slim-page">Page <span id="slimPage">1</span> of <span id="slimTotal">5</span></div>
         <div class="slim-progress" id="slimProgress"></div>
     </div>
 
@@ -690,7 +1049,7 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
         <div class="page-indicator">
-            <div>Page <span id="currentPage">1</span> of <span id="totalPages">2</span></div>
+            <div>Page <span id="currentPage">1</span> of <span id="totalPages">5</span><span class="page-name" id="pageName"></span></div>
             <div>Houston Region • QA Dept.</div>
         </div>
 
@@ -705,19 +1064,18 @@
                 <button type="button" id="draftClearBtn" style="margin-left:8px;border:none;background:none;color:#1d4ed8;font-weight:600;cursor:pointer;font-size:14px;text-decoration:underline;">Start fresh</button>
             </div>
 
+            <div class="test-banner" id="testBanner">TEST MODE: this preview emails the report to QA Admin only.</div>
+
             <form id="qaForm" novalidate>
                 <!-- Fixed region for backend/report -->
                 <input type="hidden" name="region" value="Houston">
                 <!-- Also mirror for “plant” key as a backup -->
                 <input type="hidden" name="plant" id="plantHidden">
 
-                <!-- PAGE 1 -->
-                <div class="page active" id="page1">
-                    <div class="section-label">Step 1</div>
+                <!-- PAGE 1: Visit & Production -->
+                <div class="page active" id="page1" data-title="Visit &amp; Production">
                     <div class="form-section">
                         <h3>Basic Information</h3>
-                        <p class="section-caption">Core visit details for the QA log and report.</p>
-
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Date <span class="required">*</span></label>
@@ -775,364 +1133,1042 @@
                         </div>
                     </div>
 
-                   <div class="section-label">Step 1</div>
-<div class="form-section">
-    <h3>Safety & Operations</h3>
-    <p class="section-caption">
-        High-level checks that feed the Safety & Operations section of the report.
-    </p>
+                    <div class="form-section" data-section="safety_ops" data-title="Safety &amp; Operations">
+                        <h3><span>Safety &amp; Operations</span><span class="sec-chip"></span></h3>
 
-    <div class="form-group">
-        <label>Air checks documented?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="air_checks" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="air_checks" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="air_checks" value="N/A">
-                <span>N/A</span>
-            </label>
-        </div>
-    </div>
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="drums_reversed" data-pass="Yes">
+                            <label class="q-label">Drums reversed / washed out properly?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="drums_reversed" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="drums_reversed" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="drums_reversed" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="drums_reversed_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
 
-    <div class="form-group">
-        <label>Drums reversed / washed out properly?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="drums_reversed" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="drums_reversed" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="drums_reversed" value="N/A">
-                <span>N/A</span>
-            </label>
-        </div>
-    </div>
+                        <div class="form-group q-card" data-q="washdown_observed">
+                            <label class="q-label">Truck washdown observed?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="washdown_observed" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="washdown_observed" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="washdown_observed" value="No trucks were being loaded">
+                                        <span>No trucks loading</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="washdown_observed_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                            <div class="conditional-field" id="washdownTimeField">
+                                <label>Washdown time observed</label>
+                                <input type="text" name="washdown_time" inputmode="numeric"
+                                       placeholder="e.g. 2 min 30 sec — or notes on what you saw">
+                                <div class="note-text">How long the washdown took, plus anything notable (excess water into drum, skipped fins, etc.).</div>
+                            </div>
+                        </div>
 
-    <div class="form-group">
-        <label>Truck washdown observed?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="washdown_observed" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="washdown_observed" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="washdown_observed" value="No trucks were being loaded">
-                <span>No trucks loading</span>
-            </label>
-        </div>
-        <div class="conditional-field" id="washdownTimeField">
-            <label>Washdown time observed</label>
-            <input type="text" name="washdown_time" inputmode="numeric"
-                   placeholder="e.g. 2 min 30 sec — or notes on what you saw">
-            <div class="note-text">How long the washdown took, plus anything notable (excess water into drum, skipped fins, etc.).</div>
-        </div>
-    </div>
+                        <div class="form-group q-card" data-q="batch_tickets_complete" data-pass="Yes">
+                            <label class="q-label">Batch tickets complete? <span style="font-weight:400;color:#6b7280;">(mix ID, quantities, water added on site)</span></label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="batch_tickets_complete" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="batch_tickets_complete" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="batch_tickets_complete" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="batch_tickets_complete_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                            <div class="note-text">Spot-check one ticket during the visit.</div>
+                        </div>
 
-    <div class="form-group">
-        <label>Loads properly mixed before discharge?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="properly_mixed" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="properly_mixed" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="properly_mixed" value="N/A">
-                <span>N/A</span>
-            </label>
-        </div>
-    </div>
+                        <div class="form-group q-card" data-q="environment_safe" data-pass="Acceptable">
+                            <label class="q-label">Overall safety / housekeeping environment?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="environment_safe" value="Acceptable" required>
+                                        <span>Acceptable</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="environment_safe" value="Needs Improvement">
+                                        <span>Needs Improvement</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="environment_safe_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label>Excessive water added at the plant?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="excessive_water" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="excessive_water" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="excessive_water" value="N/A">
-                <span>N/A</span>
-            </label>
-        </div>
-    </div>
+                        <div class="photo-panel" data-photos="safety_ops">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Safety &amp; Operations photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label>Batch tickets complete? <span style="font-weight:400;color:#6b7280;">(mix ID, quantities, water added on site)</span></label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="batch_tickets_complete" value="Yes" required>
-                <span>Yes</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="batch_tickets_complete" value="No">
-                <span>No</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="batch_tickets_complete" value="N/A">
-                <span>N/A</span>
-            </label>
-        </div>
-        <div class="note-text">Spot-check one ticket during the visit.</div>
-    </div>
+                    <div class="form-section" data-section="water_control" data-title="Water Control">
+                        <h3><span>Water Control</span><span class="sec-chip"></span></h3>
 
-    <div class="form-group">
-        <label>Overall safety / housekeeping environment?</label>
-        <div class="pill-group">
-            <label class="pill-option">
-                <input type="radio" name="environment_safe" value="Acceptable" required>
-                <span>Acceptable</span>
-            </label>
-            <label class="pill-option">
-                <input type="radio" name="environment_safe" value="Needs Improvement">
-                <span>Needs Improvement</span>
-            </label>
-        </div>
-        <div class="note-text">
-            Short detail can be added in comments on the next page.
-        </div>
-    </div>
-</div>
-</div>
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="excessive_water" data-pass="No">
+                            <label class="q-label">Excessive water added at the plant?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="excessive_water" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="excessive_water" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="excessive_water" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="excessive_water_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
 
-<!-- PAGE 2 -->
-<div class="page" id="page2">
-    <div class="section-label">Step 2</div>
-    <div class="form-section">
-        <h3>Aggregates</h3>
-        <p class="section-caption">
-            Observations that roll up into the Aggregates section of the report.
-        </p>
+                        <div class="form-group q-card" data-q="water_measured" data-pass="Yes">
+                            <label class="q-label">All water additions weighed or metered and recorded by the batch computer?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_measured" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_measured" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_measured" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="water_measured_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            <label>Stockpiles managed appropriately?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="stockpiles_managed" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="stockpiles_managed" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="stockpiles_managed" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
+                        <div class="form-group q-card" data-q="water_trims_2gal" data-pass="Yes">
+                            <label class="q-label">Water trims 2 gallons per yard or less?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_trims_2gal" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_trims_2gal" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="water_trims_2gal" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="water_trims_2gal_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="form-group">
-            <label>Moisture probes working / moisture tests performed?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="moisture_probes" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="moisture_probes" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="moisture_probes" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-            <div class="note-text">Aggregate moisture drives water accuracy — probes reading sanely or daily tests on record.</div>
-        </div>
+                        <div class="photo-panel" data-photos="water_control">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Water Control photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
 
-        <div class="form-group">
-            <label>Aggregate bins emptied / maintained?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="bins_emptied" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="bins_emptied" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="bins_emptied" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-label">Step 2</div>
-    <div class="form-section">
-        <h3>Cement & Silo</h3>
-        <p class="section-caption">
-            Items that drive the Cement & Silo best-practices block in the PDF/email.
-        </p>
-
-        <div class="form-group">
-            <label>Cement best practices followed?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="cement_best_practices" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="cement_best_practices" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="cement_best_practices" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Fill pipes locked / secure?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="fill_pipes_locked" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="fill_pipes_locked" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="fill_pipes_locked" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Calibration records current? <span style="font-weight:400;color:#6b7280;">(scales &amp; admix dispensers &mdash; every 6 months)</span></label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="minimum_tests" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="minimum_tests" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="minimum_tests" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Scale locks / verification in place?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="scale_locks" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="scale_locks" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="scale_locks" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Testing tools & equipment available?</label>
-            <div class="pill-group">
-                <label class="pill-option">
-                    <input type="radio" name="testing_tools" value="Yes" required>
-                    <span>Yes</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="testing_tools" value="No">
-                    <span>No</span>
-                </label>
-                <label class="pill-option">
-                    <input type="radio" name="testing_tools" value="N/A">
-                    <span>N/A</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-label">Step 2</div>
-    <div class="form-section">
-        <h3>Comments & Photos</h3>
-        <p class="section-caption">
-            These fields appear in the professional “Comments & Notes” block plus inline photos
-            in the PDF/email.
-        </p>
-
-        <div class="form-group">
-            <label>Daily Operations Comments</label>
-            <textarea name="daily_ops_comments"
-                      placeholder="Concrete batching, QC tests, truck flow, etc."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Aggregate Comments</label>
-            <textarea name="aggregate_comments"
-                      placeholder="Stockpile condition, contamination, moisture control, etc."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Cement / Silo Comments</label>
-            <textarea name="cement_comments"
-                      placeholder="Silo levels, aeration, plugging, cement handling."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Final Notes</label>
-            <textarea name="final_notes"
-                      placeholder="Key risks, wins, follow up actions, and commitments."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Photos (up to 10)</label>
-            <div class="file-upload">
-                <input type="file" id="photoUpload" accept="image/*" multiple>
-                <div class="note-text">
-                    Images are compressed before sending and attached to the PDF/email.
                 </div>
-            </div>
-            <div class="file-list" id="fileList"></div>
-            <div id="photoSizeInfo" style="font-size:12px;color:#64748b;margin-top:5px;display:none;"></div>
-        </div>
 
-        <div class="form-group">
-            <label>Email for Copy (required)</label>
-            <input type="email" name="email" required
-                   placeholder="Enter email to receive a copy of this report">
-            <div class="note-text">
-                A copy of the report will be emailed here. QA Admin is always BCC’d automatically.
-            </div>
-        </div>
-    </div>
-</div>
+                <!-- PAGE 2: Raw Materials -->
+                <div class="page" id="page2" data-title="Raw Materials">
+                    <div class="form-section" data-section="aggregates" data-title="Aggregates">
+                        <h3><span>Aggregates</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card q-pair" data-q="agg_source_1" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 1</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_1_material" aria-label="Aggregate 1 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 1 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 1 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_2" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 2</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_2_material" aria-label="Aggregate 2 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 2 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 2 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_3" data-kind="pair" data-required="1">
+                            <label class="q-label">Aggregate 3</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_3_material" aria-label="Aggregate 3 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 3 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 3 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="agg_source_4" data-kind="pair">
+                            <label class="q-label">Aggregate 4 <span style="font-weight:400;color:#6b7280;">(if used)</span></label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="agg_source_4_material" aria-label="Aggregate 4 material"><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="agg_source_4" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 4 supplier">
+                                </div>
+                                <input type="text" class="pair-other" name="agg_source_4_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 4 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="stockpiles_managed" data-pass="Yes">
+                            <label class="q-label">Stockpiles managed appropriately?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="stockpiles_managed" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="stockpiles_managed" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="stockpiles_managed" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="stockpiles_managed_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="agg_bins_labeled" data-pass="Yes">
+                            <label class="q-label">Bins marked and labeled with material name, size and source?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_bins_labeled" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_bins_labeled" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_bins_labeled" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="agg_bins_labeled_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="agg_contained" data-pass="Yes">
+                            <label class="q-label">Material contained inside the bins with no spill over?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_contained" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_contained" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_contained" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="agg_contained_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="agg_no_contamination" data-pass="Yes">
+                            <label class="q-label">Handled to avoid contamination and segregation? <span style="font-weight:400;color:#6b7280;">(concrete pads, ground protection)</span></label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_no_contamination" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_no_contamination" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_no_contamination" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="agg_no_contamination_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="agg_pile_shelf" data-pass="Yes">
+                            <label class="q-label">Adequate shelf at the bottom of the piles?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_pile_shelf" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_pile_shelf" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_pile_shelf" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="agg_pile_shelf_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="agg_ssd" data-pass="Yes">
+                            <label class="q-label">Coarse aggregate kept at least SSD?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_ssd" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_ssd" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="agg_ssd" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="agg_ssd_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                            <div class="note-text">SSD: saturated surface dry.</div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="aggregates">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Aggregates photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-section="cement_silo" data-title="Cement &amp; Silo">
+                        <h3><span>Cement &amp; Silo</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card q-pair" data-q="silo_source_1" data-kind="pair" data-required="1">
+                            <label class="q-label">Silo 1</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_1_material" aria-label="Silo 1 material" required><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 1 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 1 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="silo_source_2" data-kind="pair" data-required="1">
+                            <label class="q-label">Silo 2</label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_2_material" aria-label="Silo 2 material" required><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 2 supplier" required>
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 2 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card q-pair" data-q="silo_source_3" data-kind="pair">
+                            <label class="q-label">Silo 3 <span style="font-weight:400;color:#6b7280;">(if used)</span></label>
+                            <div class="answer-row">
+                                <div class="pair-row">
+                                    <select name="silo_source_3_material" aria-label="Silo 3 material"><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
+                                    <input type="text" name="silo_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 3 supplier">
+                                </div>
+                                <input type="text" class="pair-other" name="silo_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 3 material name">
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="fill_pipes_locked" data-pass="Yes">
+                            <label class="q-label">Fill pipes locked / secure?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="fill_pipes_locked" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="fill_pipes_locked" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="fill_pipes_locked" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="fill_pipes_locked_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="silo_pipes_marked" data-pass="Yes">
+                            <label class="q-label">Inlet pipes marked with the correct material name and color? <span style="font-weight:400;color:#6b7280;">(cement, fly ash, slag)</span></label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_marked" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_marked" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_marked" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="silo_pipes_marked_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="silo_pipes_no_leaks" data-pass="Yes">
+                            <label class="q-label">Pipes and containment free of holes and leaks?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_no_leaks" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_no_leaks" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="silo_pipes_no_leaks" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="silo_pipes_no_leaks_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="cement_silo">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Cement &amp; Silo photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-section="admixtures" data-title="Admixtures">
+                        <h3><span>Admixtures</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="admix_tanks_labeled" data-pass="Yes">
+                            <label class="q-label">Admixture tanks labeled?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_tanks_labeled" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_tanks_labeled" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_tanks_labeled" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="admix_tanks_labeled_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="admix_bottles_labeled" data-pass="Yes">
+                            <label class="q-label">Admixture bottles labeled?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_bottles_labeled" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_bottles_labeled" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_bottles_labeled" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="admix_bottles_labeled_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="admix_no_leaks" data-pass="Yes">
+                            <label class="q-label">Admixture pumps and lines free of leaks?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_no_leaks" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_no_leaks" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_no_leaks" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="admix_no_leaks_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="admix_room_locked" data-pass="Yes">
+                            <label class="q-label">Admixture storage building locked, with nothing else stored in it?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_room_locked" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_room_locked" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="admix_room_locked" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="admix_room_locked_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="admixtures">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Admixtures photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- PAGE 3: Process & Plant -->
+                <div class="page" id="page3" data-title="Process &amp; Plant">
+                    <div class="form-section" data-section="moisture" data-title="Moisture Control">
+                        <h3><span>Moisture Control</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="moisture_probes" data-pass="Yes">
+                            <label class="q-label">Moisture probes working / moisture tests performed?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_probes" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_probes" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_probes" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="moisture_probes_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="moisture_daily" data-pass="Yes">
+                            <label class="q-label">Moisture determinations done at least twice per day?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_daily" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_daily" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moisture_daily" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="moisture_daily_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="sand_probe_calibrated" data-pass="Yes">
+                            <label class="q-label">Sand probe calibrated in the last month?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="sand_probe_calibrated" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="sand_probe_calibrated" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="sand_probe_calibrated" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="sand_probe_calibrated_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                            <div class="note-text">Choose N/A if the plant has no sand probe.</div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="moistures_in_batch" data-pass="Yes">
+                            <label class="q-label">Current moistures used in the batch computer?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="moistures_in_batch" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moistures_in_batch" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="moistures_in_batch" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="moistures_in_batch_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="moisture">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Moisture Control photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-section="certifications" data-title="Certifications &amp; Calibration">
+                        <h3><span>Certifications &amp; Calibration</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="nrmca_cert_current" data-pass="Yes">
+                            <label class="q-label">NRMCA plant certification valid for at least the next 3 months?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="nrmca_cert_current" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="nrmca_cert_current" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="nrmca_cert_current" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="nrmca_cert_current_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="minimum_tests" data-pass="Yes">
+                            <label class="q-label">Calibration records current? <span style="font-weight:400;color:#6b7280;">(scales &amp; admix dispensers &mdash; every 6 months)</span></label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="minimum_tests" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="minimum_tests" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="minimum_tests" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="minimum_tests_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="slump_stand_meter" data-pass="Yes">
+                            <label class="q-label">Slump stand water meter verified in the last 6 months?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="slump_stand_meter" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="slump_stand_meter" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="slump_stand_meter" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="slump_stand_meter_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="scale_locks" data-pass="Yes">
+                            <label class="q-label">Scale locks / verification in place?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="scale_locks" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="scale_locks" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="scale_locks" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="scale_locks_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="scales_zero" data-pass="Yes">
+                            <label class="q-label">Scales return to zero between loads?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="scales_zero" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="scales_zero" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="scales_zero" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="scales_zero_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="certifications">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Certifications &amp; Calibration photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-section="batch_computer" data-title="Batch Computer">
+                        <h3><span>Batch Computer</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="tol_solids" data-pass="Yes">
+                            <label class="q-label">Batches solid materials within 1%?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_solids" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_solids" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_solids" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="tol_solids_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="tol_admix" data-pass="Yes">
+                            <label class="q-label">Batches admixtures within 3%?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_admix" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_admix" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_admix" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="tol_admix_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="tol_water" data-pass="Yes">
+                            <label class="q-label">Batches water within 1%?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_water" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_water" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="tol_water" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="tol_water_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="batch_computer">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Batch Computer photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-section="plant_equipment" data-title="Plant Equipment">
+                        <h3><span>Plant Equipment</span><span class="sec-chip"></span></h3>
+
+                    <div class="q-list">
+                        <div class="form-group q-card" data-q="overhead_bins_condition" data-pass="Yes">
+                            <label class="q-label">Overhead bins free of rust and holes?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="overhead_bins_condition" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="overhead_bins_condition" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="overhead_bins_condition" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="overhead_bins_condition_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group q-card" data-q="discharge_boot" data-pass="Yes">
+                            <label class="q-label">Discharge boot reaches into the hopper of every truck?</label>
+                            <div class="answer-row">
+                                <div class="pill-group">
+                                    <label class="pill-option">
+                                        <input type="radio" name="discharge_boot" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="discharge_boot" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="discharge_boot" value="N/A">
+                                        <span>N/A</span>
+                                    </label>
+                                </div>
+                                <textarea class="q-comment" name="discharge_boot_comment" rows="1" placeholder="Comment (optional)" aria-label="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="photo-panel" data-photos="plant_equipment">
+                            <div class="photo-head">
+                                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>Plant Equipment photos</span>
+                                <span class="photo-count"></span>
+                            </div>
+                            <div class="photo-strip">
+                                <label class="photo-add">
+                                    <input type="file" accept="image/*" multiple>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><circle cx="12" cy="13" r="3"/></svg>
+                                    <span class="photo-add-text">Add photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-msg" role="status"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- PAGE 4: Final Comments -->
+                <div class="page" id="page4" data-title="Final Comments">
+                    <div class="form-section" data-notes="1" data-title="Final Comments">
+                        <h3>Final Comments</h3>
+
+                        <div class="form-group">
+                            <label>Daily Operations Comments</label>
+                            <textarea name="daily_ops_comments"
+                                      placeholder="Concrete batching, QC tests, truck flow, etc."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Aggregate Comments</label>
+                            <textarea name="aggregate_comments"
+                                      placeholder="Stockpile condition, contamination, moisture control, etc."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Cement / Silo Comments</label>
+                            <textarea name="cement_comments"
+                                      placeholder="Silo levels, aeration, plugging, cement handling."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Final Notes</label>
+                            <textarea name="final_notes"
+                                      placeholder="Key risks, wins, follow up actions, and commitments."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email for Copy (required)</label>
+                            <input type="email" name="email" required
+                                   placeholder="Enter email to receive a copy of this report">
+                            <div class="note-text">
+                                A copy of the report will be emailed here (quikrete-readymix.com addresses only). QA Admin is always BCC’d automatically.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 <div class="button-row">
                     <button type="button" class="btn btn-secondary" id="prevBtn">Previous</button>
                     <button type="button" class="btn btn-primary" id="nextBtn">Next Page</button>
@@ -1160,6 +2196,9 @@
         <div class="spinner"></div>
         <div id="loadingMessage">Submitting QA Plant Visit report…</div>
         <div style="font-size:12px;color:#64748b;margin-top:4px;">Please wait — this may take a moment with photos attached.</div>
+        <!-- Turnstile renders here only if it needs the user to interact. It must
+             live inside this box: the backdrop covers everything else on the page. -->
+        <div id="turnstileBox" style="flex-basis:100%;"></div>
     </div>
 </div>
 
@@ -1167,23 +2206,127 @@
   // === CONFIG: Vercel API endpoint that proxies to Apps Script ===
   const API_URL = "https://qa-api-proxy.vercel.app/api/submit";
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // Page controls
-    let currentPage = 1;
-    const totalPages = 2;
+  // Preview copy only: true tags the submission test_mode, so the report is
+  // emailed to QA Admin alone (no plant recipients) and logged as TEST.
+  const TEST_MODE = false;
 
-    const pages = document.querySelectorAll(".page");
+  // Cloudflare Turnstile bot check (proxy verifies the token server-side).
+  // Empty = off: no script is loaded and no token is sent. Set to the widget's
+  // SITE key (public) once the widget exists; the SECRET key lives in Vercel only.
+  const TURNSTILE_SITE_KEY = "0x4AAAAAAFWJbKFDO7G0mlVm";
+
+  // Photo limits: any section can take any number, up to PHOTOS_PER_REPORT
+  // for the whole report, plus a size budget that keeps the submission under
+  // the Vercel proxy's 4.5 MB request cap.
+  const PHOTOS_PER_REPORT = 24;
+  const PHOTO_BUDGET_CHARS = 3600000;
+  const MAX_BODY_CHARS = 4200000;
+
+  // === Turnstile: script loads early, the challenge runs only when Submit is
+  // pressed (tokens live 5 minutes and a visit takes longer than that to fill in).
+  // lastError: why the last token fetch produced no token; sent to the proxy as
+  // cf_turnstile_error so the runtime log can tell a blocked script from a
+  // refused domain. The proxy logs it and strips it before forwarding.
+  const turnstileState = { widgetId: null, onToken: null, onFail: null, lastError: "" };
+
+  function loadTurnstileScript() {
+    if (!TURNSTILE_SITE_KEY || window.turnstile || document.getElementById("turnstileScript")) return;
+    const s = document.createElement("script");
+    s.id = "turnstileScript";
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
+  function waitForTurnstile(ms) {
+    return new Promise((resolve) => {
+      const started = Date.now();
+      (function poll() {
+        if (window.turnstile) return resolve(true);
+        if (Date.now() - started > ms) return resolve(false);
+        setTimeout(poll, 100);
+      })();
+    });
+  }
+
+  // Resolves to a fresh token, or null when Turnstile is off or unavailable.
+  // With no token the proxy decides: enforcement off forwards anyway, enforcement
+  // on answers 403 and the user sees "reload and try again".
+  async function getTurnstileToken() {
+    if (!TURNSTILE_SITE_KEY) return null;
+    turnstileState.lastError = "";
+    loadTurnstileScript();
+    if (!(await waitForTurnstile(10000))) {
+      console.warn("Turnstile script not available; submitting without a token");
+      turnstileState.lastError = "script-not-loaded";
+      return null;
+    }
+    const box = document.getElementById("turnstileBox");
+    return new Promise((resolve) => {
+      let settled = false;
+      const timer = setTimeout(() => fail("timeout-60s"), 60000);
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (!value) turnstileState.lastError = turnstileState.lastError || "empty-token";
+        resolve(value || null);
+      }
+      function fail(reason) {
+        if (!settled) turnstileState.lastError = reason;
+        finish(null);
+      }
+      turnstileState.onToken = finish;
+      turnstileState.onFail = fail;
+      try {
+        if (turnstileState.widgetId === null) {
+          turnstileState.widgetId = window.turnstile.render(box, {
+            sitekey: TURNSTILE_SITE_KEY,
+            action: "qa_submit",
+            execution: "execute",
+            appearance: "interaction-only",
+            callback: (token) => turnstileState.onToken && turnstileState.onToken(token),
+            "error-callback": (code) => turnstileState.onFail && turnstileState.onFail("error:" + (code || "unknown")),
+            "expired-callback": () => {},
+            "timeout-callback": () => turnstileState.onFail && turnstileState.onFail("timeout-callback"),
+          });
+        } else {
+          window.turnstile.reset(turnstileState.widgetId);
+        }
+        window.turnstile.execute(turnstileState.widgetId);
+      } catch (err) {
+        console.warn("Turnstile error", err);
+        fail("render-error");
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadTurnstileScript();
+
+    // Page controls
+    const pages = Array.from(document.querySelectorAll(".page"));
+    const totalPages = pages.length;
+    let currentPage = 1;
+
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const submitBtn = document.getElementById("submitBtn");
     const progressFill = document.getElementById("progressFill");
     const currentPageSpan = document.getElementById("currentPage");
     const totalPagesSpan = document.getElementById("totalPages");
+    const pageNameSpan = document.getElementById("pageName");
     const loadingSpinner = document.getElementById("loadingSpinner");
     const formEl = document.getElementById("qaForm");
     const successMessage = document.getElementById("successMessage");
 
     if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
+
+    if (TEST_MODE) {
+      const testBanner = document.getElementById("testBanner");
+      if (testBanner) testBanner.style.display = "block";
+    }
 
     function showPage(pageNum) {
       pages.forEach((page, index) => {
@@ -1192,6 +2335,7 @@
 
       currentPage = pageNum;
       if (currentPageSpan) currentPageSpan.textContent = pageNum;
+      if (pageNameSpan) pageNameSpan.textContent = pages[pageNum - 1].dataset.title || "";
       const slimPage = document.getElementById("slimPage");
       if (slimPage) slimPage.textContent = pageNum;
       const slimTotal = document.getElementById("slimTotal");
@@ -1207,18 +2351,25 @@
       if (prevBtn) prevBtn.style.display = pageNum === 1 ? "none" : "inline-flex";
       if (nextBtn) nextBtn.style.display = pageNum === totalPages ? "none" : "inline-flex";
       if (submitBtn) submitBtn.style.display = pageNum === totalPages ? "inline-flex" : "none";
+
+      // Comment boxes on hidden pages measure 0 tall; size them now they show
+      pages[pageNum - 1].querySelectorAll("textarea.q-comment").forEach(autoGrow);
     }
 
     // === Validation ===
-    function showError(message) {
+    let errorTimer = null;
+    function showError(message, sticky) {
       const errorDiv = document.getElementById("errorMessage");
       const errorText = document.getElementById("errorText");
       if (!errorDiv || !errorText) return;
       errorText.textContent = message;
       errorDiv.classList.add("show");
-      setTimeout(() => {
-        errorDiv.classList.remove("show");
-      }, 5000);
+      clearTimeout(errorTimer);
+      if (!sticky) {
+        errorTimer = setTimeout(() => {
+          errorDiv.classList.remove("show");
+        }, 5000);
+      }
     }
 
     function validatePage(pageNum) {
@@ -1258,17 +2409,33 @@
       if (!isValid) {
         showError("Please fill in all required fields on this page.");
         if (firstInvalidField && firstInvalidField.scrollIntoView) {
-          firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+          const target = firstInvalidField.closest(".form-group") || firstInvalidField;
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
 
       return isValid;
     }
 
-    // === File upload / image compression ===
-    const photoUpload = document.getElementById("photoUpload");
-    const fileList = document.getElementById("fileList");
-    let uploadedFiles = [];
+    // === Photos: one strip per section ===
+    let photos = []; // { id, section, name, caption, data }
+    let photoSeq = 0;
+    let photoJobs = 0; // add batches still compressing (Submit waits for these)
+    const sectionOrder = Array.from(document.querySelectorAll(".form-section[data-section]"))
+      .map((s) => s.dataset.section);
+
+    function newPhotoId() {
+      return "p" + Date.now().toString(36) + "_" + (photoSeq++);
+    }
+
+    function photoChars() {
+      return photos.reduce((sum, p) => sum + p.data.length, 0);
+    }
+
+    function sectionTitle(id) {
+      const sec = document.querySelector('.form-section[data-section="' + id + '"]');
+      return sec ? sec.dataset.title : id;
+    }
 
     function compressImage(file) {
       return new Promise((resolve, reject) => {
@@ -1333,83 +2500,183 @@
       });
     }
 
-    function displayFiles() {
-      if (!fileList) return;
-      fileList.innerHTML = "";
-      uploadedFiles.forEach((file, index) => {
-        const preview = document.createElement("div");
-        preview.className = "image-preview";
+    function photoMessage(panel, text) {
+      const msg = panel.querySelector(".photo-msg");
+      if (!msg) return;
+      msg.textContent = text || "";
+      msg.classList.toggle("show", !!text);
+    }
 
+    function renderPhotos(sectionId) {
+      const panel = document.querySelector('.photo-panel[data-photos="' + sectionId + '"]');
+      if (!panel) return;
+      const strip = panel.querySelector(".photo-strip");
+      const addTile = panel.querySelector(".photo-add");
+      strip.querySelectorAll(".photo-tile").forEach((t) => t.remove());
+
+      const mine = photos.filter((p) => p.section === sectionId);
+      mine.forEach((p) => {
+        const tile = document.createElement("div");
+        tile.className = "photo-tile";
+
+        const thumb = document.createElement("div");
+        thumb.className = "thumb";
         const img = document.createElement("img");
-        img.src = file.data;
-        img.alt = file.name;
-        preview.appendChild(img);
+        img.src = p.data;
+        img.alt = p.caption || "Photo";
+        thumb.appendChild(img);
 
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "remove-btn";
-        btn.textContent = "x";
+        btn.setAttribute("aria-label", "Remove photo");
+        btn.textContent = "×";
         btn.addEventListener("click", () => {
-          uploadedFiles.splice(index, 1);
-          displayFiles();
-          saveDraft();
+          photos = photos.filter((x) => x.id !== p.id);
+          photoMessage(panel, "");
+          renderAllPhotos(); // a freed slot re-opens Add in every section
+          savePhotos();
         });
-        preview.appendChild(btn);
+        thumb.appendChild(btn);
 
-        fileList.appendChild(preview);
+        const cap = document.createElement("input");
+        cap.type = "text";
+        cap.className = "photo-caption";
+        cap.placeholder = "Caption";
+        cap.maxLength = 80;
+        cap.value = p.caption || "";
+        cap.setAttribute("aria-label", "Photo caption");
+        cap.addEventListener("input", () => {
+          p.caption = cap.value;
+          savePhotos();
+        });
+
+        tile.appendChild(thumb);
+        tile.appendChild(cap);
+        strip.insertBefore(tile, addTile);
       });
 
-      // Show total compressed size
-      const sizeInfo = document.getElementById("photoSizeInfo");
-      if (sizeInfo) {
-        if (uploadedFiles.length > 0) {
-          const totalBytes = uploadedFiles.reduce((sum, f) => sum + f.data.length, 0);
-          const totalKB = (totalBytes / 1024).toFixed(0);
-          const color = totalBytes > 3000000 ? "#e74c3c" : totalBytes > 1500000 ? "#f39c12" : "#27ae60";
-          sizeInfo.innerHTML = uploadedFiles.length + " photo(s) — <span style='color:" + color + ";font-weight:bold;'>" + totalKB + " KB compressed</span>";
-          sizeInfo.style.display = "block";
-        } else {
-          sizeInfo.style.display = "none";
-        }
-      }
+      panel.querySelector(".photo-count").textContent =
+        mine.length === 0 ? "" : mine.length === 1 ? "1 photo" : mine.length + " photos";
+      if (addTile) addTile.classList.toggle("full", photos.length >= PHOTOS_PER_REPORT);
     }
 
-    if (photoUpload && fileList) {
-      photoUpload.addEventListener("change", async (e) => {
+    function renderAllPhotos() {
+      sectionOrder.forEach(renderPhotos);
+    }
+
+    document.querySelectorAll(".photo-panel").forEach((panel) => {
+      const sectionId = panel.dataset.photos;
+      const input = panel.querySelector('input[type="file"]');
+      const addText = panel.querySelector(".photo-add-text");
+      if (!input) return;
+
+      input.addEventListener("change", async (e) => {
         const files = Array.from(e.target.files || []);
+        input.value = "";
+        if (!files.length) return;
+        photoMessage(panel, "");
+        if (addText) addText.textContent = "Adding…";
+        // One batch at a time per section (a second pick waits for the first)
+        input.disabled = true;
+        photoJobs++;
 
-        if (uploadedFiles.length + files.length > 10) {
-          showError("Maximum 10 files allowed.");
-          photoUpload.value = "";
-          return;
-        }
+        try {
+          for (const file of files) {
+            if (photos.length >= PHOTOS_PER_REPORT) {
+              photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
+              break;
+            }
+            if (!file.type || !file.type.startsWith("image/")) {
+              photoMessage(panel, "Only image files can be added.");
+              continue;
+            }
 
-        for (let file of files) {
-          if (!file.type || !file.type.startsWith("image/")) {
-            showError("Please upload only image files.");
-            continue;
+            try {
+              const data = await compressImage(file);
+              // Re-checked after the await: another section may have filled the report meanwhile
+              if (photos.length >= PHOTOS_PER_REPORT) {
+                photoMessage(panel, "This report holds " + PHOTOS_PER_REPORT + " photos. Remove one to add another.");
+                break;
+              }
+              if (photoChars() + data.length > PHOTO_BUDGET_CHARS) {
+                photoMessage(panel, "This report has reached its photo size limit. Remove a photo to add another.");
+                break;
+              }
+              photos.push({ id: newPhotoId(), section: sectionId, name: file.name || "photo.jpg", caption: "", data: data });
+            } catch (err) {
+              console.error("Error processing image:", err);
+              photoMessage(panel, "Could not read " + (file.name || "that photo") + ".");
+            }
           }
-
-          try {
-            const compressed = await compressImage(file);
-            uploadedFiles.push({ name: file.name, data: compressed });
-          } catch (err) {
-            console.error("Error processing image:", err);
-            showError("Failed to process " + file.name);
-          }
+        } finally {
+          photoJobs--;
+          input.disabled = false;
+          if (addText) addText.textContent = "Add photo";
+          renderAllPhotos();
+          savePhotos();
         }
+      });
+    });
 
-        displayFiles();
-        photoUpload.value = "";
-        saveDraft();
+    function waitForPhotos(maxMs) {
+      return new Promise((resolve) => {
+        const start = Date.now();
+        (function tick() {
+          if (photoJobs === 0) return resolve(true);
+          if (Date.now() - start > maxMs) return resolve(false);
+          setTimeout(tick, 200);
+        })();
       });
     }
 
     // === Draft autosave / resume ===
-    // Everything typed is saved on this device as you go (photos included,
-    // best-effort). A refresh, crash, or dead battery no longer loses a walk.
-    const DRAFT_KEY = "qa_visit_draft_v1";
+    // Answers live in localStorage; photos live in IndexedDB (too big for
+    // localStorage once every section can hold pictures). A refresh, crash,
+    // or dead battery no longer loses a walk.
+    // The /preview/ copy shares this site's storage with the live form, so it
+    // keeps its own keys: a real walk in progress never opens in test mode.
+    const STORE_SUFFIX = TEST_MODE ? "_preview" : "";
+    const DRAFT_KEY = "qa_visit_draft_v2" + STORE_SUFFIX;
+    const DRAFT_KEY_V1 = TEST_MODE ? null : "qa_visit_draft_v1"; // single photo box drafts from before Oct 2026
+    const PHOTO_DB = "qa_visit_draft_photos" + STORE_SUFFIX;
     let draftRestoring = false;
+    let submitted = false; // after a successful send nothing may re-save the draft
+
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        try {
+          const req = indexedDB.open(PHOTO_DB, 1);
+          req.onupgradeneeded = () => req.result.createObjectStore("kv");
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    function idbRun(mode, fn) {
+      return idbOpen().then((db) => new Promise((resolve, reject) => {
+        const tx = db.transaction("kv", mode);
+        const req = fn(tx.objectStore("kv"));
+        tx.oncomplete = () => { db.close(); resolve(req ? req.result : undefined); };
+        tx.onerror = tx.onabort = () => { db.close(); reject(tx.error); };
+      }));
+    }
+
+    const idbGet = (key) => idbRun("readonly", (store) => store.get(key));
+    const idbPut = (key, value) => idbRun("readwrite", (store) => store.put(value, key));
+    const idbDel = (key) => idbRun("readwrite", (store) => store.delete(key));
+
+    // Some phones never answer an IndexedDB open; don't let that stall the page
+    function withTimeout(promise, ms) {
+      return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+    }
+
+    function photoSnapshot() {
+      return photos.map((p) => Object.assign({}, p));
+    }
 
     function collectDraft() {
       const d = { fields: {}, savedAt: new Date().toISOString() };
@@ -1423,72 +2690,248 @@
       return d;
     }
 
+    // Only real edits mark the draft dirty, so closing an untouched page
+    // never leaves a blank "in-progress report" behind
+    let draftDirty = false;
+    function writeDraft() {
+      if (submitted) return;
+      draftDirty = false;
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(collectDraft()));
+      } catch (e) { /* storage unavailable: form still works normally */ }
+    }
+
+    let photosDirty = false;
+    function writePhotos() {
+      if (submitted) return Promise.resolve();
+      photosDirty = false;
+      return idbPut("photos", photoSnapshot()).catch(() => {});
+    }
+
     let draftTimer = null;
     function saveDraft() {
-      if (draftRestoring) return;
+      if (draftRestoring || submitted) return;
+      draftDirty = true;
       clearTimeout(draftTimer);
-      draftTimer = setTimeout(() => {
-        try {
-          const d = collectDraft();
-          try {
-            // Photos ride along when they fit in storage; silently skipped when not
-            d.photos = uploadedFiles;
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
-          } catch (quotaErr) {
-            delete d.photos;
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
-          }
-        } catch (e) { /* storage unavailable — form still works normally */ }
+      draftTimer = setTimeout(writeDraft, 400);
+    }
+
+    let photoTimer = null;
+    function savePhotos() {
+      if (draftRestoring || submitted) return;
+      photosDirty = true;
+      clearTimeout(photoTimer);
+      photoTimer = setTimeout(() => {
+        writePhotos();
+        writeDraft(); // keeps the restore banner's "saved at" time current
       }, 400);
     }
 
+    // Write anything still waiting on the debounce right now: before a send,
+    // and when the phone backgrounds the page (camera open, app switch, lock)
+    function flushDraft() {
+      if (draftRestoring || submitted) return;
+      if (draftDirty) {
+        clearTimeout(draftTimer);
+        writeDraft();
+      }
+      if (photosDirty) {
+        clearTimeout(photoTimer);
+        writePhotos();
+      }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushDraft();
+    });
+    window.addEventListener("pagehide", flushDraft);
+
     function clearDraft() {
-      // Cancel any pending debounced save — otherwise an answer clicked just
-      // before Submit re-writes the draft AFTER this clear (verified in test)
+      // Cancel pending debounced saves: otherwise an answer clicked just
+      // before Submit re-writes the draft AFTER this clear
       clearTimeout(draftTimer);
-      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+      clearTimeout(photoTimer);
+      draftDirty = false;
+      photosDirty = false;
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+        if (DRAFT_KEY_V1) localStorage.removeItem(DRAFT_KEY_V1);
+      } catch (e) {}
       const banner = document.getElementById("draftBanner");
       if (banner) banner.style.display = "none";
+      return idbDel("photos").catch(() => {});
     }
 
-    function restoreDraft() {
+    function readDraft() {
       let d = null;
+      let fromV1 = false;
       try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (e) {}
-      if (!d || !d.fields || !Object.keys(d.fields).length) return;
-      draftRestoring = true;
-      Object.entries(d.fields).forEach(([name, value]) => {
-        const els = formEl.querySelectorAll('[name="' + name + '"]');
-        els.forEach((el) => {
-          if (el.type === "radio") {
-            if (el.value === value) el.checked = true;
-          } else {
-            el.value = value;
-          }
-        });
-      });
-      if (Array.isArray(d.photos) && d.photos.length) {
-        uploadedFiles = d.photos;
-        displayFiles();
+      if ((!d || !d.fields) && DRAFT_KEY_V1) {
+        try {
+          d = JSON.parse(localStorage.getItem(DRAFT_KEY_V1) || "null");
+          fromV1 = !!(d && d.fields);
+        } catch (e) {}
       }
-      draftRestoring = false;
+      if (d && !d.fields) d = null;
+      return { d: d, fromV1: fromV1 };
+    }
+
+    // Answers come back immediately (synchronous), before anything can be typed
+    function restoreFields(d) {
+      draftRestoring = true;
+      try {
+        Object.entries(d.fields).forEach(([name, value]) => {
+          const els = formEl.querySelectorAll('[name="' + name + '"]');
+          els.forEach((el) => {
+            if (el.type === "radio") {
+              if (el.value === value) el.checked = true;
+            } else {
+              el.value = value;
+            }
+          });
+        });
+      } finally {
+        draftRestoring = false;
+      }
+    }
+
+    function showRestoreBanner(d, note) {
       const banner = document.getElementById("draftBanner");
       const bannerText = document.getElementById("draftBannerText");
-      if (banner && bannerText) {
-        let when = "";
-        try {
+      if (!banner || !bannerText) return;
+      let when = "";
+      try {
+        if (d && d.savedAt) {
           const t = new Date(d.savedAt);
           when = " from " + t.toLocaleDateString() + " " +
                  t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-        } catch (e) {}
-        bannerText.textContent = "Your in-progress report" + when + " was restored.";
-        banner.style.display = "block";
+        }
+      } catch (e) {}
+      bannerText.textContent = "Your in-progress report" + when + " was restored." + (note || "");
+      banner.style.display = "block";
+    }
+
+    // Photos come back from IndexedDB a moment later; anything added in the
+    // meantime is kept alongside them
+    async function restorePhotos(draft) {
+      let restored = [];
+      let note = "";
+      if (draft.fromV1) {
+        // Old drafts had one photo box at the end ({name, data} items):
+        // they go into the first section, where the inspector can sort them
+        (Array.isArray(draft.d.photos) ? draft.d.photos : []).forEach((p) => {
+          const sec = sectionOrder[0];
+          if (sec && p && p.data && restored.length < PHOTOS_PER_REPORT) {
+            restored.push({ id: newPhotoId(), section: sec, name: p.name || "photo.jpg", caption: "", data: p.data });
+          }
+        });
+        if (restored.length) note = " Its photos were placed under " + sectionTitle(sectionOrder[0]) + ".";
+      } else {
+        let saved = null;
+        try { saved = await withTimeout(idbGet("photos"), 4000); } catch (e) {}
+        if (Array.isArray(saved)) {
+          restored = saved.filter((p) => p && p.data && sectionOrder.indexOf(p.section) !== -1);
+        }
+      }
+
+      if (restored.length) {
+        const ids = new Set(restored.map((p) => p.id));
+        photos = restored.concat(photos.filter((p) => !ids.has(p.id)));
+        renderAllPhotos();
+      }
+
+      if (draft.fromV1) {
+        // Carry the old draft forward in the new format; retire the old key
+        // only once its photos are safely stored in the new place
+        writeDraft();
+        const retire = () => { try { localStorage.removeItem(DRAFT_KEY_V1); } catch (e) {} };
+        if (restored.length) {
+          idbPut("photos", photoSnapshot()).then(retire).catch(() => {});
+        } else {
+          retire();
+        }
+      }
+
+      if (restored.length && !submitted) showRestoreBanner(draft.d, note);
+    }
+
+    // === Question cards ===
+    // Comment boxes grow with their text (one line until more is typed)
+    function autoGrow(ta) {
+      if (!ta || !ta.offsetParent) return; // hidden page: sized when shown
+      const minH = parseFloat(getComputedStyle(ta).minHeight) || 46;
+      ta.style.height = "auto";
+      ta.style.height = Math.max(minH, ta.scrollHeight + 2) + "px";
+    }
+
+    // A card fails when its answer is not the passing one (N/A never fails;
+    // cards without data-pass, like washdown observed, are never scored)
+    function isFailing(card) {
+      const pass = card.dataset.pass;
+      const checked = card.querySelector('input[type="radio"]:checked');
+      return !!(pass && checked && checked.value !== pass && checked.value !== "N/A");
+    }
+
+    // A material-source row (data-kind="pair") is answered by its typed
+    // supplier: "57LS: Cemex Katy", or the typed name when Other is picked.
+    // Every other card is answered by its picked pill.
+    function cardValue(card) {
+      if (card.dataset.kind === "pair") {
+        const sel = card.querySelector("select");
+        const other = card.querySelector("input.pair-other");
+        const src = card.querySelector('input[type="text"]:not(.pair-other)');
+        let m = sel ? sel.value.trim() : "";
+        if (m === "Other") m = other ? other.value.trim() : "";
+        const s = src ? src.value.trim() : "";
+        return s ? (m ? m + ": " + s : s) : "";
+      }
+      const picked = card.querySelector('input[type="radio"]:checked');
+      return picked ? picked.value : "";
+    }
+
+    // "Other (type it)" shows the material name box, required on a required row
+    function syncPairOther(card) {
+      const sel = card.querySelector("select");
+      const other = card.querySelector("input.pair-other");
+      if (!sel || !other) return;
+      const on = sel.value === "Other";
+      other.classList.toggle("show", on);
+      other.required = on && card.dataset.required === "1";
+      if (!on) other.classList.remove("invalid");
+    }
+
+    function syncCard(card) {
+      if (card.dataset.kind === "pair") syncPairOther(card);
+      const checked = cardValue(card);
+      const failing = isFailing(card);
+      card.classList.toggle("answered", !!checked);
+      card.classList.toggle("failing", failing);
+      const comment = card.querySelector("textarea.q-comment");
+      if (comment) {
+        comment.classList.toggle("flag", failing);
+        comment.placeholder = failing ? "What needs fixing?" : "Comment (optional)";
       }
     }
 
-    // A question card is "answered" when any of its inputs holds a value —
-    // flips the gray rail to brand yellow so remaining work stands out
+    function syncSectionChip(section) {
+      if (!section) return;
+      const chip = section.querySelector(".sec-chip");
+      if (!chip) return;
+      const cards = Array.from(section.querySelectorAll(".q-card"));
+      const done = cards.filter((c) => cardValue(c) !== "").length;
+      chip.textContent = done + " of " + cards.length + " answered";
+      chip.classList.toggle("done", cards.length > 0 && done === cards.length);
+    }
+
+    // A plain card is "answered" when any of its inputs holds a value; a
+    // question card only when an answer is picked (a comment alone is not
+    // an answer). Gray rail = still to do, yellow = done, amber = failing.
     function refreshAnswered(group) {
       if (!group) return;
+      if (group.classList.contains("q-card")) {
+        syncCard(group);
+        syncSectionChip(group.closest(".form-section"));
+        return;
+      }
       const anyRadio = group.querySelector('input[type="radio"]:checked');
       const anyValue = Array.from(group.querySelectorAll('input[type="text"], input[type="date"], input[type="email"], select, textarea'))
         .some((el) => el.value && el.value.trim() !== "");
@@ -1497,10 +2940,14 @@
 
     function refreshAllAnswered() {
       formEl.querySelectorAll(".form-group").forEach(refreshAnswered);
+      formEl.querySelectorAll(".form-section").forEach(syncSectionChip);
+      formEl.querySelectorAll("textarea.q-comment").forEach(autoGrow);
     }
 
     formEl.addEventListener("input", (e) => {
-      if (e.target) refreshAnswered(e.target.closest(".form-group"));
+      const t = e.target;
+      if (t && t.classList && t.classList.contains("q-comment")) autoGrow(t);
+      if (t && t.closest) refreshAnswered(t.closest(".form-group"));
       saveDraft();
     });
     formEl.addEventListener("change", (e) => {
@@ -1509,16 +2956,84 @@
         const group = e.target.closest(".form-group");
         if (group) group.classList.remove("invalid-group");
       }
-      if (e.target) refreshAnswered(e.target.closest(".form-group"));
+      if (e.target && e.target.closest) refreshAnswered(e.target.closest(".form-group"));
       saveDraft();
+    });
+    // Enter in a one line box (caption, name) must not submit the report mid walk
+    formEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target && e.target.tagName === "INPUT") e.preventDefault();
     });
 
     const draftClearBtn = document.getElementById("draftClearBtn");
     if (draftClearBtn) {
       draftClearBtn.addEventListener("click", () => {
-        clearDraft();
-        location.reload();
+        clearDraft().then(() => location.reload());
       });
+    }
+
+    // === Typing on a phone ===
+    // The on-screen keyboard takes half the screen; the sticky Previous/Next
+    // bar and the slim header would cover the field being typed in. While a
+    // text box has focus they step aside (CSS on body.typing).
+    function isTextField(el) {
+      return !!el && (el.tagName === "TEXTAREA" ||
+        (el.tagName === "INPUT" && /^(text|email|search|tel|number|url)$/.test(el.type)));
+    }
+    document.addEventListener("focusin", (e) => {
+      if (isTextField(e.target)) document.body.classList.add("typing");
+    });
+    document.addEventListener("focusout", (e) => {
+      if (!isTextField(e.target)) return;
+      setTimeout(() => {
+        if (!isTextField(document.activeElement)) document.body.classList.remove("typing");
+      }, 60);
+    });
+
+    // === Report structure sent with the flat fields ===
+    // The backend renders the PDF/email from this, so questions added or
+    // reworded here show up in the report with no Apps Script change.
+    function cleanText(el) {
+      return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
+    }
+
+    function buildReport() {
+      const sections = [];
+      document.querySelectorAll(".form-section[data-section]").forEach((sec) => {
+        const questions = [];
+        sec.querySelectorAll(".q-card").forEach((card) => {
+          const comment = card.querySelector("textarea.q-comment");
+          const q = {
+            key: card.dataset.q,
+            label: cleanText(card.querySelector(".q-label")),
+            answer: cardValue(card),
+            comment: comment ? comment.value.trim() : "",
+            pass: card.dataset.pass || ""
+          };
+          const extra = [];
+          card.querySelectorAll(".conditional-field.show").forEach((cf) => {
+            const input = cf.querySelector("input[name], textarea[name]");
+            if (input && input.value.trim()) {
+              extra.push({ label: cleanText(cf.querySelector("label")) || input.name, value: input.value.trim() });
+            }
+          });
+          if (extra.length) q.extra = extra;
+          questions.push(q);
+        });
+        sections.push({
+          id: sec.dataset.section,
+          title: sec.dataset.title,
+          questions: questions,
+          photo_count: photos.filter((p) => p.section === sec.dataset.section).length
+        });
+      });
+
+      const notes = [];
+      document.querySelectorAll(".form-section[data-notes] textarea[name]").forEach((ta) => {
+        const group = ta.closest(".form-group");
+        notes.push({ key: ta.name, label: cleanText(group ? group.querySelector("label") : null) || ta.name, value: ta.value.trim() });
+      });
+
+      return { version: 2, sections: sections, notes: notes };
     }
 
     // === Page buttons ===
@@ -1542,13 +3057,42 @@
     if (formEl) {
       formEl.setAttribute("novalidate", "novalidate");
 
+      let submitting = false;
+
       formEl.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        // One send at a time: a second tap or Enter under the overlay would
+        // otherwise post the same report twice
+        if (submitting || submitted) return;
         if (!validatePage(currentPage)) return;
+
+        submitting = true;
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          await sendReport();
+        } finally {
+          submitting = false;
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+
+      async function sendReport() {
+        flushDraft(); // the error messages promise "saved on this phone"
 
         if (loadingSpinner) loadingSpinner.classList.add("show");
         const loadingMsg = document.getElementById("loadingMessage");
+
+        // A photo picked just before Submit may still be compressing
+        if (photoJobs > 0) {
+          if (loadingMsg) loadingMsg.textContent = "Finishing photos…";
+          if (!(await waitForPhotos(60000))) {
+            if (loadingSpinner) loadingSpinner.classList.remove("show");
+            showError("Photos are still being added. Give it a few seconds, then press Submit again.", true);
+            window.scrollTo(0, 0);
+            return;
+          }
+        }
 
         const formData = new FormData(formEl);
         const data = {};
@@ -1565,23 +3109,46 @@
         }
 
         data.timestamp = new Date().toISOString();
-        if (uploadedFiles.length > 0) {
-          if (loadingMsg) loadingMsg.textContent = "Uploading " + uploadedFiles.length + " photo(s)…";
-          data.images = uploadedFiles.map((f) => ({
-            name: f.name,
-            data: f.data,
-          }));
+        data.form_version = 2;
+        if (TEST_MODE) data.test_mode = true;
+        data.report = buildReport();
+
+        if (photos.length > 0) {
+          if (loadingMsg) loadingMsg.textContent = "Uploading " + photos.length + " photo(s)…";
+          data.images = photos
+            .slice()
+            .sort((a, b) => sectionOrder.indexOf(a.section) - sectionOrder.indexOf(b.section))
+            .map((p) => ({
+              name: p.name,
+              data: p.data,
+              section: p.section,
+              section_title: sectionTitle(p.section),
+              caption: (p.caption || "").trim()
+            }));
         }
 
+        // Bot check token, fetched at Submit time so it is fresh
+        if (loadingMsg) loadingMsg.textContent = "Checking the submission…";
+        const tsToken = await getTurnstileToken();
+        if (tsToken) data.cf_turnstile_token = tsToken;
+        else if (TURNSTILE_SITE_KEY) data.cf_turnstile_error = turnstileState.lastError || "no-token";
+
         // Check payload size before sending
-        const jsonBody = JSON.stringify(data);
+        let jsonBody = JSON.stringify(data);
         const payloadSizeMB = (jsonBody.length / (1024 * 1024)).toFixed(1);
         console.log("Payload size: " + payloadSizeMB + " MB");
+        if (jsonBody.length > MAX_BODY_CHARS) {
+          if (loadingSpinner) loadingSpinner.classList.remove("show");
+          showError("This report is too large to send. Remove a few photos and press Submit again.", true);
+          window.scrollTo(0, 0);
+          return;
+        }
 
-        // Offline: everything is already saved on this device — say so and stop
+        // Offline: everything is already saved on this device, so say so and stop
         if (!navigator.onLine) {
           if (loadingSpinner) loadingSpinner.classList.remove("show");
-          showError("No signal right now. Your report is saved on this phone — reopen this page when you're back in coverage and press Submit again.");
+          showError("No signal right now. Your report is saved on this phone. Reopen this page when you're back in coverage and press Submit again.", true);
+          window.scrollTo(0, 0);
           return;
         }
 
@@ -1612,6 +3179,7 @@
               const msg = payload && payload.message ? payload.message : "Submission failed on server.";
               const e = new Error(msg);
               e.noRetry = true;   // the server answered; retrying won't change it
+              e.verification = res.status === 403;   // bot check refused (expired or used token)
               throw e;
             }
             return true;
@@ -1621,7 +3189,7 @@
             if (retriable) {
               const delay = RETRY_DELAYS[attempt - 1] || 5000;
               if (loadingMsg) loadingMsg.textContent =
-                "Connection hiccup — retrying (" + (attempt + 1) + " of " + MAX_ATTEMPTS + ")…";
+                "Connection hiccup, retrying (" + (attempt + 1) + " of " + MAX_ATTEMPTS + ")…";
               await new Promise((r) => setTimeout(r, delay));
               return attemptSubmit(attempt + 1);
             }
@@ -1630,7 +3198,19 @@
         }
 
         try {
-          await attemptSubmit(1);
+          try {
+            await attemptSubmit(1);
+          } catch (err) {
+            // The proxy refused the bot check: get a fresh token and send the
+            // same report once more. Anything else is reported as before.
+            if (!(err.verification && TURNSTILE_SITE_KEY)) throw err;
+            const fresh = await getTurnstileToken();
+            if (!fresh) throw err;
+            data.cf_turnstile_token = fresh;
+            jsonBody = JSON.stringify(data);
+            await attemptSubmit(1);
+          }
+          submitted = true;
           clearDraft();
           if (loadingSpinner) loadingSpinner.classList.remove("show");
           if (formEl) formEl.style.display = "none";
@@ -1640,15 +3220,17 @@
           console.error("Submit error:", err);
           if (loadingSpinner) loadingSpinner.classList.remove("show");
           if (err.name === "AbortError") {
-            showError("Submission timed out after several tries. Your answers are saved on this phone — try removing a photo or two, or resubmit where signal is better.");
+            showError("Submission timed out after several tries. Your answers are saved on this phone. Try removing a photo or two, or resubmit where signal is better.", true);
           } else {
             showError(
               "Submission failed. Your answers are saved on this phone. " +
-                (err && err.message ? err.message : "Please try again or contact QA.")
+                (err && err.message ? err.message : "Please try again or contact QA."),
+              true
             );
           }
+          window.scrollTo(0, 0);
         }
-      });
+      }
     } else {
       console.error("qaForm element not found!");
     }
@@ -1689,17 +3271,6 @@
       sync();
     }
 
-    // === Init ===
-    restoreDraft();
-    syncWashdownField();
-    refreshAllAnswered();
-
-    const dateInput = document.querySelector('input[name="visit_date"]');
-    if (dateInput && !dateInput.value) {
-      const today = new Date().toISOString().split("T")[0];
-      dateInput.value = today;
-    }
-
     const plantSelect = document.getElementById("plantSelect");
     const plantHidden = document.getElementById("plantHidden");
     if (plantSelect && plantHidden) {
@@ -1708,7 +3279,30 @@
       });
     }
 
+    // === Init ===
     showPage(1);
+    renderAllPhotos();
+
+    const draft = readDraft();
+    if (draft.d && Object.keys(draft.d.fields).length) {
+      restoreFields(draft.d);
+      showRestoreBanner(draft.d, "");
+    }
+    syncWashdownField();
+    refreshAllAnswered();
+
+    const dateInput = document.querySelector('input[name="visit_date"]');
+    if (dateInput && !dateInput.value) {
+      // Local date, not UTC: toISOString() rolls to tomorrow after ~7 PM Central
+      const now = new Date();
+      const today = now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
+      dateInput.value = today;
+      refreshAnswered(dateInput.closest(".form-group"));
+    }
+
+    restorePhotos(draft).catch((e) => console.warn("Photo restore failed", e));
   });
 </script>
 </body>
