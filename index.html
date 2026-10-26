@@ -438,6 +438,50 @@
             z-index: 2;
         }
 
+        /* Region switch above Plant / Location (2026-10-26): looks like the answer bars */
+        .region-switch {
+            display: flex;
+            margin: 2px 0 8px;
+        }
+
+        .region-switch button {
+            flex: 1;
+            min-height: 42px;
+            padding: 6px;
+            font: inherit;
+            font-size: 15px;
+            font-weight: 500;
+            color: inherit;
+            border: 1.5px solid #d1d5db;
+            background: #f9fafb;
+            cursor: pointer;
+        }
+
+        .region-switch button:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .region-switch button + button {
+            margin-left: -1.5px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .region-switch button[aria-pressed="true"] {
+            border-color: #111827;
+            background: #111827;
+            color: var(--brand-yellow);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .region-switch button:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+            position: relative;
+            z-index: 2;
+        }
+
         /* A question that failed validation flags its whole card red */
         .form-group.invalid-group {
             background: #fef2f2;
@@ -1014,9 +1058,50 @@
             .q-list .q-card.q-pair input[type="text"],
             .q-list .q-card.q-pair select { min-height: 32px; padding: 5px 10px; font-size: 14px; }
         }
+
+        /* Supplier picker (2026-10-19): with the signed in supplier list a
+           material shows its suppliers; "Other (type it)" opens the typed box.
+           With no list (not loaded yet, or a typed material) the box is typed. */
+        .q-card.q-pair select.pair-supplier { display: none; }
+        .q-card.q-pair.has-picker select.pair-supplier { display: block; }
+        .q-card.q-pair.has-picker input.pair-supplier-text { display: none; grid-column: 1 / -1; }
+        .q-card.q-pair.has-picker.supplier-other input.pair-supplier-text { display: block; }
+        /* Filled from the plant's receipts and not changed yet (generated text,
+           so the report's question label stays "Aggregate 1") */
+        .q-card.q-pair.suggested .q-label::after {
+            content: "suggested";
+            margin-left: 8px;
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 11px;
+            font-weight: 600;
+            vertical-align: 1px;
+        }
+        .suggest-note { display: none; margin: 0 0 10px; font-size: 12px; color: #3730a3; }
+        .form-section.has-suggested .suggest-note { display: block; }
+
+        /* Sign-in: the form opens on this card until the phone is signed in */
+        body.signed-out #qaForm,
+        body.signed-out #draftBanner,
+        body.signed-out .progress-bar,
+        body.signed-out .page-indicator { display: none !important; }
+        .signin-card { display: none; }
+        body.signed-out .signin-card { display: block; }
+        .signin-card .form-group { margin-bottom: 0; }
+        .signin-card .btn { width: 100%; margin-top: 10px; }
+        .signin-card p { margin: 0 0 10px; font-size: 14px; color: #374151; }
+        .signin-step[hidden] { display: none; }
+        .signin-msg { min-height: 1.2em; margin: 10px 0 0 !important; color: #1e40af !important; }
+        .signin-msg.error { color: #b91c1c !important; }
+        .link-btn { border: none; background: none; padding: 10px 0 0; color: #1d4ed8; font-size: 14px; text-decoration: underline; cursor: pointer; }
+        .signed-in-bar { display: none; margin: 0 0 12px; font-size: 13px; color: #4b5563; }
+        body.signed-in .signed-in-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .signed-in-bar .link-btn { padding: 0; font-size: 13px; }
 </style>
 </head>
-<body>
+<body class="signed-out">
 <div class="page-shell">
     <!-- SLIM BRAND BAR (fixed; slides in when the big header scrolls away) -->
     <div class="slim-bar" id="slimBar" aria-hidden="true">
@@ -1050,7 +1135,7 @@
         </div>
         <div class="page-indicator">
             <div>Page <span id="currentPage">1</span> of <span id="totalPages">5</span><span class="page-name" id="pageName"></span></div>
-            <div>Houston Region • QA Dept.</div>
+            <div id="regionLine">Houston Region • QA Dept.</div>
         </div>
 
         <!-- FORM CONTENT -->
@@ -1066,8 +1151,37 @@
 
             <div class="test-banner" id="testBanner">TEST MODE: this preview emails the report to QA Admin only.</div>
 
+            <!-- SIGN-IN: outside the form, so nothing here is saved in the draft or sent with a report -->
+            <div class="form-section signin-card" id="signinCard">
+                <h3><span>Sign in</span></h3>
+                <div class="form-group">
+                    <div class="signin-step" id="signinStepEmail">
+                        <p>Enter your email. A 6 digit code comes by email; this phone then stays signed in for 30 days.</p>
+                        <label for="signinEmail">Email</label>
+                        <input type="email" id="signinEmail" autocomplete="email" inputmode="email" maxlength="254" placeholder="Your work email">
+                        <button type="button" class="btn btn-primary" id="signinSendBtn">Send code</button>
+                    </div>
+                    <div class="signin-step" id="signinStepCode" hidden>
+                        <p>Code sent to <b id="signinCodeTo"></b>. It is good for 10 minutes.</p>
+                        <label for="signinCode">6 digit code</label>
+                        <input type="text" id="signinCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+                        <button type="button" class="btn btn-primary" id="signinVerifyBtn">Sign in</button>
+                        <button type="button" class="link-btn" id="signinBackBtn">Use another email or get a new code</button>
+                    </div>
+                    <p class="signin-msg" id="signinMsg" role="status"></p>
+                    <button type="button" class="link-btn" id="signinBackToForm" hidden>Back to the report</button>
+                </div>
+            </div>
+
+            <div class="signed-in-bar" id="signedInBar">
+                <span id="signedInText">Signed in as <b id="signedInWho"></b></span>
+                <span id="signinEndedText" hidden>Your 30 day sign in has ended. Keep going; sign in again before you submit.</span>
+                <button type="button" class="link-btn" id="signinAgainBtn" hidden>Sign in</button>
+                <button type="button" class="link-btn" id="signOutBtn">Sign out</button>
+            </div>
+
             <form id="qaForm" novalidate>
-                <!-- Fixed region for backend/report -->
+                <!-- Region for backend/report: follows the Houston | West Texas switch on page 1 -->
                 <input type="hidden" name="region" value="Houston">
                 <!-- Also mirror for “plant” key as a backup -->
                 <input type="hidden" name="plant" id="plantHidden">
@@ -1084,6 +1198,10 @@
 
                             <div class="form-group">
                                 <label>Plant / Location <span class="required">*</span></label>
+                                <div class="region-switch" id="regionSwitch" role="group" aria-label="Region">
+                                    <button type="button" data-region="Houston" aria-pressed="true">Houston</button>
+                                    <button type="button" data-region="West Texas" aria-pressed="false">West Texas</button>
+                                </div>
                                 <select name="houston_location" id="plantSelect" required>
                                     <option value="">-- Select Plant --</option>
                                     <option value="PLANT 691- JERSEY VILLAGE (RM01)">PLANT 691- JERSEY VILLAGE (RM01)</option>
@@ -1112,7 +1230,6 @@
                                     <option value="PLANT 782 - SPRING (RM26)">PLANT 782 - SPRING (RM26)</option>
                                     <option value="PLANT 783 - WILLIS (RM27)">PLANT 783 - WILLIS (RM27)</option>
                                 </select>
-                                <div class="note-text">Houston region plants only.</div>
                             </div>
                         </div>
 
@@ -1338,7 +1455,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="agg_source_1_material" aria-label="Aggregate 1 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="agg_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 1 supplier" required>
+                                    <input type="text" class="pair-supplier-text" name="agg_source_1" maxlength="44" placeholder="Supplier" aria-label="Aggregate 1 supplier" required>
                                 </div>
                                 <input type="text" class="pair-other" name="agg_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 1 material name">
                             </div>
@@ -1349,7 +1466,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="agg_source_2_material" aria-label="Aggregate 2 material" required><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="agg_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 2 supplier" required>
+                                    <input type="text" class="pair-supplier-text" name="agg_source_2" maxlength="44" placeholder="Supplier" aria-label="Aggregate 2 supplier" required>
                                 </div>
                                 <input type="text" class="pair-other" name="agg_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 2 material name">
                             </div>
@@ -1360,7 +1477,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="agg_source_3_material" aria-label="Aggregate 3 material"><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="agg_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 3 supplier">
+                                    <input type="text" class="pair-supplier-text" name="agg_source_3" maxlength="44" placeholder="Supplier" aria-label="Aggregate 3 supplier">
                                 </div>
                                 <input type="text" class="pair-other" name="agg_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 3 material name">
                             </div>
@@ -1371,7 +1488,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="agg_source_4_material" aria-label="Aggregate 4 material"><option value="">Material</option><option>SAND</option><option>57LS</option><option>467GRV</option><option>8GRV</option><option>67LS</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="agg_source_4" maxlength="44" placeholder="Supplier / pit" aria-label="Aggregate 4 supplier">
+                                    <input type="text" class="pair-supplier-text" name="agg_source_4" maxlength="44" placeholder="Supplier" aria-label="Aggregate 4 supplier">
                                 </div>
                                 <input type="text" class="pair-other" name="agg_source_4_material_other" maxlength="14" placeholder="Material name" aria-label="Aggregate 4 material name">
                             </div>
@@ -1530,7 +1647,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="silo_source_1_material" aria-label="Silo 1 material" required><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="silo_source_1" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 1 supplier" required>
+                                    <input type="text" class="pair-supplier-text" name="silo_source_1" maxlength="44" placeholder="Supplier" aria-label="Silo 1 supplier" required>
                                 </div>
                                 <input type="text" class="pair-other" name="silo_source_1_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 1 material name">
                             </div>
@@ -1541,7 +1658,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="silo_source_2_material" aria-label="Silo 2 material"><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="silo_source_2" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 2 supplier">
+                                    <input type="text" class="pair-supplier-text" name="silo_source_2" maxlength="44" placeholder="Supplier" aria-label="Silo 2 supplier">
                                 </div>
                                 <input type="text" class="pair-other" name="silo_source_2_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 2 material name">
                             </div>
@@ -1552,7 +1669,7 @@
                             <div class="answer-row">
                                 <div class="pair-row">
                                     <select name="silo_source_3_material" aria-label="Silo 3 material"><option value="">Material</option><option>CEMENT</option><option>FLYASHF</option><option>SLAG</option><option value="Other">Other (type it)</option></select>
-                                    <input type="text" name="silo_source_3" maxlength="44" placeholder="Supplier / pit" aria-label="Silo 3 supplier">
+                                    <input type="text" class="pair-supplier-text" name="silo_source_3" maxlength="44" placeholder="Supplier" aria-label="Silo 3 supplier">
                                 </div>
                                 <input type="text" class="pair-other" name="silo_source_3_material_other" maxlength="14" placeholder="Material name" aria-label="Silo 3 material name">
                             </div>
@@ -2195,16 +2312,20 @@
     <div class="loading-box">
         <div class="spinner"></div>
         <div id="loadingMessage">Submitting QA Plant Visit report…</div>
-        <div style="font-size:12px;color:#64748b;margin-top:4px;">Please wait — this may take a moment with photos attached.</div>
+        <div id="loadingSub" style="font-size:12px;color:#64748b;margin-top:4px;">Please wait. This can take a moment with photos attached.</div>
         <!-- Turnstile renders here only if it needs the user to interact. It must
-             live inside this box: the backdrop covers everything else on the page. -->
+             live inside this box: the backdrop covers everything else on the page.
+             One widget per action: turnstileBox at Submit, turnstileBoxSignin for a code. -->
         <div id="turnstileBox" style="flex-basis:100%;"></div>
+        <div id="turnstileBoxSignin" style="flex-basis:100%;"></div>
     </div>
 </div>
 
 <script>
-  // === CONFIG: Vercel API endpoint that proxies to Apps Script ===
-  const API_URL = "https://qa-api-proxy.vercel.app/api/submit";
+  // === CONFIG: Vercel API endpoints that proxy to Apps Script ===
+  // (submit, plus request-code / verify-code / suppliers for sign-in)
+  const API_BASE = "https://qa-api-proxy.vercel.app/api/";
+  const API_URL = API_BASE + "submit";
 
   // Preview copy only: true tags the submission test_mode, so the report is
   // emailed to QA Admin alone (no plant recipients) and logged as TEST.
@@ -2214,6 +2335,11 @@
   // Empty = off: no script is loaded and no token is sent. Set to the widget's
   // SITE key (public) once the widget exists; the SECRET key lives in Vercel only.
   const TURNSTILE_SITE_KEY = "0x4AAAAAAFWJbKFDO7G0mlVm";
+
+  // Sign-in (2026-10-19). true: a phone that never signed in opens on the sign
+  // in card, and Submit needs a live sign in. false = outage switch: the form
+  // works without one (a live session is still sent, the server logs the rest).
+  const SIGNIN_REQUIRED = true;
 
   // Photo limits: any section can take any number, up to PHOTOS_PER_REPORT
   // for the whole report, plus a size budget that keeps the submission under
@@ -2227,7 +2353,10 @@
   // lastError: why the last token fetch produced no token; sent to the proxy as
   // cf_turnstile_error so the runtime log can tell a blocked script from a
   // refused domain. The proxy logs it and strips it before forwarding.
-  const turnstileState = { widgetId: null, onToken: null, onFail: null, lastError: "" };
+  // One widget per action (qa_submit at Submit, qa_signin for a sign-in code):
+  // a token is only good for the action its widget was rendered with.
+  const turnstileState = { widgets: {}, onToken: null, onFail: null, lastError: "" };
+  const TURNSTILE_BOX = { qa_submit: "turnstileBox", qa_signin: "turnstileBoxSignin" };
 
   function loadTurnstileScript() {
     if (!TURNSTILE_SITE_KEY || window.turnstile || document.getElementById("turnstileScript")) return;
@@ -2253,16 +2382,17 @@
   // Resolves to a fresh token, or null when Turnstile is off or unavailable.
   // With no token the proxy decides: enforcement off forwards anyway, enforcement
   // on answers 403 and the user sees "reload and try again".
-  async function getTurnstileToken() {
+  async function getTurnstileToken(action) {
+    action = action || "qa_submit";
     if (!TURNSTILE_SITE_KEY) return null;
     turnstileState.lastError = "";
     loadTurnstileScript();
     if (!(await waitForTurnstile(10000))) {
-      console.warn("Turnstile script not available; submitting without a token");
+      console.warn("Turnstile script not available; sending without a token");
       turnstileState.lastError = "script-not-loaded";
       return null;
     }
-    const box = document.getElementById("turnstileBox");
+    const box = document.getElementById(TURNSTILE_BOX[action] || "turnstileBox");
     return new Promise((resolve) => {
       let settled = false;
       const timer = setTimeout(() => fail("timeout-60s"), 60000);
@@ -2280,10 +2410,10 @@
       turnstileState.onToken = finish;
       turnstileState.onFail = fail;
       try {
-        if (turnstileState.widgetId === null) {
-          turnstileState.widgetId = window.turnstile.render(box, {
+        if (turnstileState.widgets[action] === undefined) {
+          turnstileState.widgets[action] = window.turnstile.render(box, {
             sitekey: TURNSTILE_SITE_KEY,
-            action: "qa_submit",
+            action: action,
             execution: "execute",
             appearance: "interaction-only",
             callback: (token) => turnstileState.onToken && turnstileState.onToken(token),
@@ -2292,9 +2422,9 @@
             "timeout-callback": () => turnstileState.onFail && turnstileState.onFail("timeout-callback"),
           });
         } else {
-          window.turnstile.reset(turnstileState.widgetId);
+          window.turnstile.reset(turnstileState.widgets[action]);
         }
-        window.turnstile.execute(turnstileState.widgetId);
+        window.turnstile.execute(turnstileState.widgets[action]);
       } catch (err) {
         console.warn("Turnstile error", err);
         fail("render-error");
@@ -2687,6 +2817,10 @@
           if (el.value) d.fields[el.name] = el.value;
         }
       });
+      // Material source rows still showing a receipts suggestion, and rows the
+      // observer changed (a later prefill never overwrites those)
+      d.suggested = Array.from(formEl.querySelectorAll(".q-card.q-pair.suggested")).map((c) => c.dataset.q);
+      d.touched = Array.from(formEl.querySelectorAll('.q-card.q-pair[data-touched="1"]')).map((c) => c.dataset.q);
       return d;
     }
 
@@ -2872,7 +3006,7 @@
     }
 
     // A material-source row (data-kind="pair") is answered by its typed
-    // supplier: "57LS: Cemex Katy", or the typed name when Other is picked.
+    // supplier: "57LS: Supplier name", or the typed name when Other is picked.
     // Every other card is answered by its picked pill.
     function cardValue(card) {
       if (card.dataset.kind === "pair") {
@@ -3080,8 +3214,16 @@
       async function sendReport() {
         flushDraft(); // the error messages promise "saved on this phone"
 
+        // A sign-in that ran out mid walk: sign in again, then press Submit
+        const signedIn = currentSession();
+        if (SIGNIN_REQUIRED && !sessionLive(signedIn)) {
+          needSignIn("Sign in again to send this report. Your answers are saved on this phone.");
+          return;
+        }
+
         if (loadingSpinner) loadingSpinner.classList.add("show");
         const loadingMsg = document.getElementById("loadingMessage");
+        setLoadingSub("Please wait. This can take a moment with photos attached.");
 
         // A photo picked just before Submit may still be compressing
         if (photoJobs > 0) {
@@ -3111,6 +3253,7 @@
         data.timestamp = new Date().toISOString();
         data.form_version = 2;
         if (TEST_MODE) data.test_mode = true;
+        if (sessionLive(signedIn)) data.session = signedIn.token;   // Apps Script checks it and prints who signed in
         data.report = buildReport();
 
         if (photos.length > 0) {
@@ -3180,6 +3323,7 @@
               const e = new Error(msg);
               e.noRetry = true;   // the server answered; retrying won't change it
               e.verification = res.status === 403;   // bot check refused (expired or used token)
+              e.session = !!(payload && payload.code === "session");   // sign-in refused (once enforced)
               throw e;
             }
             return true;
@@ -3219,6 +3363,11 @@
         } catch (err) {
           console.error("Submit error:", err);
           if (loadingSpinner) loadingSpinner.classList.remove("show");
+          if (err.session) {
+            // the server no longer takes this sign in (ended, or taken off the list)
+            signOut("Sign in again to send this report. Your answers are saved on this phone.", true);
+            return;
+          }
           if (err.name === "AbortError") {
             showError("Submission timed out after several tries. Your answers are saved on this phone. Try removing a photo or two, or resubmit where signal is better.", true);
           } else {
@@ -3279,17 +3428,555 @@
       });
     }
 
+    // === Sign-in, supplier picker and per plant prefill (2026-10-19) ===
+    // This page holds no roster, supplier list or plant data. An emailed code
+    // (Apps Script checks the Roster tab) gives the phone a signed 30 day
+    // session; with it the phone fetches the supplier list and every plant's
+    // usual materials and keeps them, so the form works with no signal.
+    const SESSION_STORE = "qa_signin_v1" + STORE_SUFFIX;
+    const SIGNIN_EMAIL_STORE = "qa_signin_email" + STORE_SUFFIX;
+    const SUPPLIER_STORE = "qa_suppliers_v1" + STORE_SUFFIX;
+    const CODE_SENT_STORE = "qa_signin_code_sent" + STORE_SUFFIX;   // {email, at}: a code is on its way
+    const CODE_LIFE_MS = 10 * 60 * 1000;                              // the server keeps a code 10 minutes
+    const SUPPLIER_REFRESH_MS = 6 * 3600 * 1000;
+    const OTHER_SUPPLIER = "__other";
+    const pairCards = Array.from(formEl.querySelectorAll('.q-card.q-pair[data-kind="pair"]'));
+    const SOURCE_ROWS_PAGE = (() => {   // the page with the Aggregate / Silo rows
+      const pg = pairCards.length ? pairCards[0].closest(".page") : null;
+      return pg ? Number(pg.id.replace("page", "")) || 2 : 2;
+    })();
+    // Storage off (blocked cookies, a WebView, a full quota): a key whose write
+    // failed lives in the page instead, so the sign-in lasts this visit and
+    // Submit does not loop back to the sign-in card. Declared before the first
+    // readStored call below.
+    const memoryStore = {};
+    let supplierData = readStored(SUPPLIER_STORE);   // { suppliers: {MAT: [names]}, plants: {"704": [{slot, material, supplier}]}, fetchedAt }
+    let prefilling = false;
+    let signinBusy = false;
+
+    function readStored(key) {
+      if (Object.prototype.hasOwnProperty.call(memoryStore, key)) return memoryStore[key];
+      try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; }
+    }
+    function writeStored(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); delete memoryStore[key]; }
+      catch (e) { memoryStore[key] = value; }
+    }
+    function dropStored(key) {
+      delete memoryStore[key];
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
+
+    function currentSession() {
+      const s = readStored(SESSION_STORE);
+      return s && typeof s.token === "string" && typeof s.expires === "number" ? s : null;
+    }
+    function sessionLive(s) {
+      return !!s && s.expires > Date.now();
+    }
+
+    function setLoadingSub(text) {
+      const sub = document.getElementById("loadingSub");
+      if (sub) sub.textContent = text || "";
+    }
+    function showLoading(message, sub) {
+      const msg = document.getElementById("loadingMessage");
+      if (msg) msg.textContent = message;
+      setLoadingSub(sub || "");
+      if (loadingSpinner) loadingSpinner.classList.add("show");
+    }
+    function hideLoading() {
+      if (loadingSpinner) loadingSpinner.classList.remove("show");
+    }
+
+    async function postApi(path, body, timeoutMs) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs || 30000);
+      try {
+        const res = await fetch(API_BASE + path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        let payload = null;
+        try { payload = await res.json(); } catch (e) {}
+        return payload && typeof payload === "object" ? payload : { status: "error", message: "The server did not answer. Try again in a minute." };
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    // --- supplier picker ---
+    function materialOf(card) {
+      const sel = card.querySelector('select[name$="_material"]');
+      const v = sel ? sel.value : "";
+      return v === "Other" ? "" : v;   // a typed material has no list
+    }
+
+    function supplierListFor(material) {
+      if (currentRegion() !== "Houston") return [];   // the list is Houston's suppliers: West Texas types its own
+      const all = supplierData && supplierData.suppliers;
+      const list = all && material && Array.isArray(all[material]) ? all[material] : [];
+      return list.filter((n) => typeof n === "string" && n.trim()).map((n) => n.trim().slice(0, 44));
+    }
+
+    // The typed box (name agg_source_N) always holds the supplier: picked or
+    // typed. The picker has no name, so drafts and reports carry one value.
+    function syncSupplierPicker(card, materialChanged) {
+      const pick = card.querySelector("select.pair-supplier");
+      const text = card.querySelector("input.pair-supplier-text");
+      if (!pick || !text) return;
+      const required = card.dataset.required === "1";
+      const list = supplierListFor(materialOf(card));
+      if (!list.length) {
+        card.classList.remove("has-picker", "supplier-other");
+        pick.required = false;
+        pick.classList.remove("invalid");
+        text.required = required;
+        text.placeholder = "Supplier";
+        return;
+      }
+      const sig = list.join("|");
+      if (pick.dataset.sig !== sig) {
+        const keep = pick.value;
+        pick.innerHTML = "";
+        pick.appendChild(new Option("Supplier", ""));
+        list.forEach((name) => pick.appendChild(new Option(name, name)));
+        pick.appendChild(new Option("Other (type it)", OTHER_SUPPLIER));
+        pick.dataset.sig = sig;
+        pick.value = keep;
+      }
+      let typed = text.value.trim();
+      let match = list.find((n) => n.toLowerCase() === typed.toLowerCase());
+      // A new material: a supplier picked (or suggested) for the old one goes;
+      // anything typed stays
+      if (materialChanged && typed && !match && (card.dataset.supplierFrom === "pick" || card.dataset.supplierFrom === "prefill")) {
+        text.value = "";
+        typed = "";
+      }
+      if (match) {
+        pick.value = match;
+        if (text.value !== match) text.value = match;
+      } else if (typed) {
+        pick.value = OTHER_SUPPLIER;
+      } else if (pick.value !== OTHER_SUPPLIER) {
+        pick.value = "";
+      }
+      const other = pick.value === OTHER_SUPPLIER;
+      card.classList.add("has-picker");
+      card.classList.toggle("supplier-other", other);
+      pick.required = required;
+      text.required = required && other;
+      text.placeholder = "Supplier name";
+      if (!other) text.classList.remove("invalid");
+    }
+
+    function renderAllPickers() {
+      pairCards.forEach((card) => syncSupplierPicker(card, false));
+    }
+
+    pairCards.forEach((card) => {
+      const text = card.querySelector("input.pair-supplier-text");
+      if (!text) return;
+      const pick = document.createElement("select");
+      pick.className = "pair-supplier";
+      pick.setAttribute("aria-label", (text.getAttribute("aria-label") || "Supplier").replace(/ supplier$/, "") + " supplier list");
+      text.parentNode.insertBefore(pick, text);
+      pick.addEventListener("change", () => {
+        if (pick.value === OTHER_SUPPLIER) {
+          text.value = "";
+          card.dataset.supplierFrom = "typed";
+          setTimeout(() => text.focus(), 0);
+        } else {
+          text.value = pick.value;
+          card.dataset.supplierFrom = "pick";
+        }
+        pick.classList.remove("invalid");
+        syncSupplierPicker(card, false);
+      });
+      text.addEventListener("input", () => { card.dataset.supplierFrom = "typed"; });
+    });
+
+    // --- prefill from the plant's receipts ---
+    function plantNumberOf(value) {
+      const m = /(\d{3,4})/.exec(value || "");
+      return m ? m[1] : "";
+    }
+
+    function pairEmpty(card) {
+      const sel = card.querySelector('select[name$="_material"]');
+      const text = card.querySelector("input.pair-supplier-text");
+      return !(sel && sel.value) && !(text && text.value.trim());
+    }
+
+    function setPair(card, material, supplier) {
+      const sel = card.querySelector('select[name$="_material"]');
+      const other = card.querySelector("input.pair-other");
+      const text = card.querySelector("input.pair-supplier-text");
+      const listed = Array.from(sel.options).some((o) => o.value && o.value !== "Other" && o.value === material);
+      if (!material) { sel.value = ""; if (other) other.value = ""; }
+      else if (listed) { sel.value = material; if (other) other.value = ""; }
+      else { sel.value = "Other"; if (other) other.value = material.slice(0, 14); }
+      text.value = (supplier || "").slice(0, 44);
+      card.dataset.supplierFrom = "prefill";
+      syncPairOther(card);
+      syncSupplierPicker(card, false);
+    }
+
+    function syncSuggestNotes() {
+      formEl.querySelectorAll(".form-section[data-section]").forEach((sec) => {
+        sec.classList.toggle("has-suggested", !!sec.querySelector(".q-card.q-pair.suggested"));
+      });
+    }
+
+    // Fills each untouched row that is empty or still a suggestion; a row the
+    // observer changed is never overwritten. A and B sides arrive pooled.
+    function applyPrefill() {
+      const plantSel = document.getElementById("plantSelect");
+      const all = supplierData && supplierData.plants;
+      // Houston receipts only: a West Texas plant gets no suggestion (and loses any left over)
+      const rows = (currentRegion() === "Houston" && all && all[plantNumberOf(plantSel && plantSel.value)]) || [];
+      let changed = false;
+      prefilling = true;
+      try {
+        pairCards.forEach((card) => {
+          if (card.dataset.touched === "1") return;
+          const wasSuggested = card.classList.contains("suggested");
+          if (!wasSuggested && !pairEmpty(card)) return;
+          const row = Array.isArray(rows) ? rows.find((r) => r && r.slot === card.dataset.q && r.material) : null;
+          if (!row && !wasSuggested) return;
+          setPair(card, row ? String(row.material) : "", row ? String(row.supplier || "") : "");
+          card.classList.toggle("suggested", !!row);
+          refreshAnswered(card);
+          changed = true;
+        });
+      } finally {
+        prefilling = false;
+      }
+      syncSuggestNotes();
+      if (changed) saveDraft();
+    }
+
+    function restorePairState(d) {
+      const has = (list, key) => Array.isArray(list) && list.indexOf(key) !== -1;
+      pairCards.forEach((card) => {
+        if (has(d && d.touched, card.dataset.q)) card.dataset.touched = "1";
+        card.classList.toggle("suggested", has(d && d.suggested, card.dataset.q) && card.dataset.touched !== "1");
+      });
+      syncSuggestNotes();
+    }
+
+    formEl.querySelectorAll('.form-section[data-section="aggregates"], .form-section[data-section="cement_silo"]').forEach((sec) => {
+      const note = document.createElement("p");
+      note.className = "suggest-note";
+      note.textContent = "Rows marked suggested come from this plant's receipts over the last 90 days. Check each one against the yard and change it if it differs.";
+      sec.insertBefore(note, sec.querySelector(".q-list"));
+    });
+
+    // An observer's own change ends the suggestion for that row
+    function markTouched(e) {
+      if (prefilling) return;
+      const card = e.target && e.target.closest && e.target.closest(".q-card.q-pair");
+      if (!card) return;
+      card.dataset.touched = "1";
+      card.classList.remove("suggested");
+      if (e.type === "change" && e.target.matches('select[name$="_material"]')) syncSupplierPicker(card, true);
+      refreshAnswered(card);
+      syncSuggestNotes();
+    }
+    formEl.addEventListener("input", markTouched);
+    formEl.addEventListener("change", markTouched);
+
+    const plantSelectEl = document.getElementById("plantSelect");
+    if (plantSelectEl) plantSelectEl.addEventListener("change", applyPrefill);
+
+    // --- region: Houston | West Texas above the plant list (2026-10-26) ---
+    // Each phone keeps its last pick, so a West Texas observer taps it once.
+    // The hidden "region" field carries it to the report (header, sheet,
+    // and in the Apps Script who the report goes to).
+    const REGION_STORE = "qa_region" + STORE_SUFFIX;
+    const regionField = formEl.querySelector('input[name="region"]');
+    const regionLine = document.getElementById("regionLine");
+    const regionButtons = Array.from(document.querySelectorAll("#regionSwitch button[data-region]"));
+    const REGION_PLANTS = {
+      "Houston": Array.from(plantSelectEl.options).map((o) => o.value).filter(Boolean),
+      "West Texas": [
+        "PLANT 712 - MIDLAND SOUTH", "PLANT 713 - ODESSA", "PLANT 714 - MONAHANS", "PLANT 715 - BARSTOW",
+        "PLANT 716 - CRANE", "PLANT 717 - BIG SPRING", "PLANT 718 - CEMCO PORTABLE-GC", "PLANT 719 - MIDLAND NORTH",
+        "PLANT 720 - CENTRAL", "PLANT 846 - RMC LUBBOCK", "PLANT 847 - VIRTUAL LUBBOCK",
+        "PLANT 858 - RMC AFTON PORTABLE", "PLANT 864 - ABERNATHY PORTABLE",
+      ],
+    };
+
+    function currentRegion() {
+      return regionField && regionField.value === "West Texas" ? "West Texas" : "Houston";
+    }
+    function regionOfPlant(plant) {
+      return Object.keys(REGION_PLANTS).find((r) => REGION_PLANTS[r].indexOf(plant) !== -1) || "";
+    }
+
+    // Lists the region's plants; a plant from the other region is cleared
+    function setRegion(region, remember) {
+      if (!REGION_PLANTS[region]) region = "Houston";
+      const before = plantSelectEl.value;
+      regionField.value = region;
+      plantSelectEl.innerHTML = "";
+      plantSelectEl.appendChild(new Option("-- Select Plant --", ""));
+      REGION_PLANTS[region].forEach((p) => plantSelectEl.appendChild(new Option(p, p)));
+      plantSelectEl.value = REGION_PLANTS[region].indexOf(before) !== -1 ? before : "";
+      regionButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.region === region)));
+      if (regionLine) regionLine.textContent = region + " Region • QA Dept.";
+      if (remember) writeStored(REGION_STORE, region);
+      renderAllPickers();
+      if (before && !plantSelectEl.value) plantSelectEl.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    regionButtons.forEach((b) => b.addEventListener("click", () => {
+      if (b.dataset.region !== currentRegion()) setRegion(b.dataset.region, true);
+    }));
+
+    // --- sign-in card ---
+    const signinEmail = document.getElementById("signinEmail");
+    const signinCode = document.getElementById("signinCode");
+    const signinMsg = document.getElementById("signinMsg");
+    const stepEmail = document.getElementById("signinStepEmail");
+    const stepCode = document.getElementById("signinStepCode");
+
+    function signinMessage(text, isError) {
+      if (!signinMsg) return;
+      signinMsg.textContent = text || "";
+      signinMsg.classList.toggle("error", !!isError);
+    }
+
+    function fillIfBlank(selector, value) {
+      const el = formEl.querySelector(selector);
+      if (el && !el.value.trim() && value) {
+        el.value = value;
+        refreshAnswered(el.closest(".form-group"));
+      }
+    }
+
+    // ended: the 30 days ran out on this phone. The form stays usable (a visit
+    // in progress, maybe with no signal); Submit asks for a new sign in.
+    function showSignedIn(s, ended) {
+      document.body.classList.remove("signed-out");
+      document.body.classList.add("signed-in");
+      const who = document.getElementById("signedInWho");
+      if (who) who.textContent = s.name ? s.name + " (" + s.email + ")" : s.email;
+      document.getElementById("signedInText").hidden = !!ended;
+      document.getElementById("signinEndedText").hidden = !ended;
+      document.getElementById("signinAgainBtn").hidden = !ended;
+      document.getElementById("signOutBtn").hidden = !!ended;
+      if (!ended) {
+        fillIfBlank('input[name="qa_observer_name"]', s.name);
+        fillIfBlank('input[name="email"]', s.email);
+      }
+      signinMessage("");
+    }
+
+    function showSignedOut(message, isError) {
+      document.body.classList.add("signed-out");
+      document.body.classList.remove("signed-in");
+      if (stepEmail) stepEmail.hidden = false;
+      if (stepCode) stepCode.hidden = true;
+      const last = readStored(SIGNIN_EMAIL_STORE);
+      if (signinEmail && !signinEmail.value && typeof last === "string") signinEmail.value = last;
+      const back = document.getElementById("signinBackToForm");
+      if (back) back.hidden = !currentSession();   // only after a sign in that ran out
+      // The phone reloaded the page while the code was being read in Mail:
+      // open on the code step again, so the code in hand still works
+      const sent = readStored(CODE_SENT_STORE);
+      const waiting = !!sent && typeof sent.email === "string" && sent.email === last &&
+        typeof sent.at === "number" && Date.now() - sent.at < CODE_LIFE_MS;
+      if (waiting && stepEmail && stepCode) {
+        const to = document.getElementById("signinCodeTo");
+        if (to) to.textContent = sent.email;
+        stepEmail.hidden = true;
+        stepCode.hidden = false;
+      }
+      signinMessage(message || (waiting ? "Enter the 6 digit code from the email." : ""), isError);
+    }
+
+    // Ends the sign-in on this phone (Sign out, or the server no longer takes
+    // the session): the saved supplier list goes too. The report draft stays.
+    function signOut(message, isError) {
+      dropStored(SESSION_STORE);
+      dropStored(SUPPLIER_STORE);
+      supplierData = null;
+      renderAllPickers();
+      if (!SIGNIN_REQUIRED) {   // outage switch: the form never waits on a sign-in
+        document.body.classList.remove("signed-in", "signed-out");
+        return;
+      }
+      showSignedOut(message, isError);
+      window.scrollTo(0, 0);
+    }
+
+    // The sign in ran out: ask for a new one. The old record and the saved
+    // supplier list stay (the person was verified), so "Back to the report"
+    // and a reload with no signal still open the report.
+    function needSignIn(message) {
+      hideLoading();
+      showSignedOut(message, true);
+      window.scrollTo(0, 0);
+    }
+
+    async function refreshSuppliers(force) {
+      const s = currentSession();
+      if (!sessionLive(s) || !navigator.onLine) return;
+      if (!force && supplierData && Date.now() - (supplierData.fetchedAt || 0) < SUPPLIER_REFRESH_MS) return;
+      try {
+        const p = await postApi("suppliers", { session: s.token }, 20000);
+        if (p.status === "ok" && p.suppliers && typeof p.suppliers === "object" && p.plants && typeof p.plants === "object") {
+          supplierData = { suppliers: p.suppliers, plants: p.plants, fetchedAt: Date.now() };
+          writeStored(SUPPLIER_STORE, supplierData);
+          renderAllPickers();
+          // A list that lands after the observer has passed the source rows (a
+          // sign in again at Submit) fills nothing: no unchecked suggestion is
+          // sent as if it were seen at the plant
+          if (currentPage <= SOURCE_ROWS_PAGE) applyPrefill();
+        } else if (p.code === "session") {
+          signOut("Your sign in has ended. Sign in again; your report is saved on this phone.", true);
+        }
+      } catch (e) {
+        console.warn("Supplier list not refreshed (kept the saved one)", e);
+      }
+    }
+
+    async function sendCode() {
+      if (signinBusy) return;
+      const email = (signinEmail && signinEmail.value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        signinMessage("Enter your full email address.", true);
+        return;
+      }
+      if (!navigator.onLine) {
+        signinMessage("No signal right now. Signing in needs a connection; after that the form works without one.", true);
+        return;
+      }
+      signinBusy = true;
+      showLoading("Sending your code…", "This takes a few seconds.");
+      try {
+        const token = await getTurnstileToken("qa_signin");
+        const body = { email: email };
+        if (token) body.cf_turnstile_token = token;
+        else if (TURNSTILE_SITE_KEY) body.cf_turnstile_error = turnstileState.lastError || "no-token";
+        const p = await postApi("request-code", body);
+        if (p.status === "ok") {
+          writeStored(SIGNIN_EMAIL_STORE, email);
+          writeStored(CODE_SENT_STORE, { email: email, at: Date.now() });
+          const to = document.getElementById("signinCodeTo");
+          if (to) to.textContent = email;
+          stepEmail.hidden = true;
+          stepCode.hidden = false;
+          signinCode.value = "";
+          signinMessage(p.message || "If that address is on the list, a code is on its way.");
+          setTimeout(() => signinCode.focus(), 50);
+        } else {
+          signinMessage(p.message || "Could not send a code. Try again.", true);
+        }
+      } catch (err) {
+        signinMessage(err && err.name === "AbortError" ? "That took too long. Check the signal and try again." : "Could not reach the server. Check the signal and try again.", true);
+      } finally {
+        hideLoading();
+        signinBusy = false;
+      }
+    }
+
+    async function checkCode() {
+      if (signinBusy) return;
+      const code = (signinCode && signinCode.value || "").replace(/\D/g, "");
+      if (code.length !== 6) {
+        signinMessage("Enter the 6 digit code from the email.", true);
+        return;
+      }
+      signinBusy = true;
+      showLoading("Signing in…", "");
+      try {
+        const stored = readStored(SIGNIN_EMAIL_STORE);
+        const email = (typeof stored === "string" && stored) || (signinEmail && signinEmail.value || "").trim();
+        const p = await postApi("verify-code", { email: email, code: code });
+        if (p.status === "ok" && typeof p.session === "string") {
+          const s = {
+            token: p.session,
+            expires: Number(p.expires) || Date.now() + 30 * 86400000,
+            email: typeof p.email === "string" ? p.email : email,
+            name: typeof p.name === "string" ? p.name : "",
+          };
+          writeStored(SESSION_STORE, s);
+          dropStored(CODE_SENT_STORE);
+          signinCode.value = "";
+          showSignedIn(s);
+          refreshAllAnswered();
+          await refreshSuppliers(true);
+          window.scrollTo(0, 0);
+        } else {
+          signinMessage(p.message || "That code did not work. Ask for a new one.", true);
+          if (p.code === "tries" || p.code === "expired") {
+            dropStored(CODE_SENT_STORE);
+            stepCode.hidden = true;
+            stepEmail.hidden = false;
+          }
+        }
+      } catch (err) {
+        signinMessage(err && err.name === "AbortError" ? "That took too long. Check the signal and try again." : "Could not reach the server. Check the signal and try again.", true);
+      } finally {
+        hideLoading();
+        signinBusy = false;
+      }
+    }
+
+    const sendBtn = document.getElementById("signinSendBtn");
+    if (sendBtn) sendBtn.addEventListener("click", sendCode);
+    const verifyBtn = document.getElementById("signinVerifyBtn");
+    if (verifyBtn) verifyBtn.addEventListener("click", checkCode);
+    const backBtn = document.getElementById("signinBackBtn");
+    if (backBtn) backBtn.addEventListener("click", () => { dropStored(CODE_SENT_STORE); stepCode.hidden = true; stepEmail.hidden = false; signinMessage(""); });
+    if (signinEmail) signinEmail.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); sendCode(); } });
+    if (signinCode) {
+      signinCode.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkCode(); } });
+      signinCode.addEventListener("input", () => { if (signinCode.value.replace(/\D/g, "").length === 6) checkCode(); });
+    }
+    const signOutBtn = document.getElementById("signOutBtn");
+    if (signOutBtn) signOutBtn.addEventListener("click", () => signOut("Signed out. Your report draft is still saved on this phone."));
+    const againBtn = document.getElementById("signinAgainBtn");
+    if (againBtn) againBtn.addEventListener("click", () => { showSignedOut("Sign in again to send reports. Your report in progress is kept.", false); window.scrollTo(0, 0); });
+    const backToForm = document.getElementById("signinBackToForm");
+    if (backToForm) backToForm.addEventListener("click", () => {
+      const s = currentSession();
+      if (s) showSignedIn(s, !sessionLive(s));
+      window.scrollTo(0, 0);
+    });
+
     // === Init ===
     showPage(1);
     renderAllPhotos();
 
     const draft = readDraft();
+    // Region before the draft: a saved visit's plant decides it, else this phone's last pick
+    const draftPlant = draft.d && draft.d.fields ? draft.d.fields.houston_location : "";
+    setRegion(regionOfPlant(draftPlant) || readStored(REGION_STORE) || "Houston", false);
     if (draft.d && Object.keys(draft.d.fields).length) {
       restoreFields(draft.d);
+      restorePairState(draft.d);
       showRestoreBanner(draft.d, "");
     }
+    renderAllPickers();
     syncWashdownField();
     refreshAllAnswered();
+
+    const startSession = currentSession();
+    if (sessionLive(startSession)) {
+      showSignedIn(startSession, false);
+      refreshSuppliers(false);
+    } else if (startSession) {
+      showSignedIn(startSession, true);   // ran out on this phone: keep working, sign in again at Submit
+    } else if (SIGNIN_REQUIRED) {
+      showSignedOut("", false);
+    } else {
+      document.body.classList.remove("signed-out");
+    }
 
     const dateInput = document.querySelector('input[name="visit_date"]');
     if (dateInput && !dateInput.value) {
